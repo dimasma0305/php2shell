@@ -1,0 +1,28 @@
+[*] fingerprint status=200 php=PHP/8.4.26 server=Apache/2.4.69 (Debian)
+[*] profile calibration -> official-php-8.4.26-apache-trixie-stock-preapp
+[*] profile=official-php-8.4.26-apache-trixie-stock-preapp build=official-php-8.4.26-apache-trixie-amd64 layout=trixie-reproducer-v1
+[*] offsets source=registry build=official-php-8.4.26-apache-trixie-amd64 zif=0x465370 dtor=0x65eb60 hash=0x690d8
+[*] application route: CodeIgniter 4 default welcome page
+[*] prefork worker wave: auto-selected 5 workers
+[*] prefork reset wave: skipped; four workers remain pristine
+[*] callback proof: listen=0.0.0.0:8000 path=/xn
+[*] heap worker wave 1/1
+[*] leak_heap worker wave: [(0, '0x7fc1d3200000', ''), (1, '0x7fc1d3200000', ''), (2, '0x7fc1d3200000', ''), (3, '0x7fc1d3200000', ''), (4, '0x7fc1d3200000', '')]
+[*] requesting a fresh prefork worker
+[*] requesting a fresh prefork worker
+[*] requesting a fresh prefork worker
+[*] requesting a fresh prefork worker
+[*] requesting a fresh prefork worker
+[+] heap chunk base: 0x7fc1d3200000
+[*] libphp worker wave 1/1
+[*] leak_libphp worker wave: [(0, '0x7fc1d4e8b000', ''), (1, '0x7fc1d4e8b000', ''), (2, '0x7fc1d4e8b000', ''), (3, '0x7fc1d4e8b000', ''), (4, '0x7fc1d4e8b000', '')]
+[*] requesting a fresh prefork worker
+[*] requesting a fresh prefork worker
+[*] requesting a fresh prefork worker
+[*] requesting a fresh prefork worker
+[*] requesting a fresh prefork worker
+[+] libphp base: 0x7fc1d4e8b000
+[*] execution addresses: table=0x7fc1d32690d8 zif_system=0x7fc1d52f0370
+[*] execution worker wave 1/1
+[*] execution worker wave: [(0, 'IncompleteRead: IncompleteRead(6 bytes read)'), (1, 'IncompleteRead: IncompleteRead(6 bytes read)'), (2, 'RemoteDisconnected: Remote end closed connection without response'), (3, 'RemoteDisconnected: Remote end closed connection without response'), (4, 'IncompleteRead: IncompleteRead(6 bytes read)')]
+PROOF: callback path=/xn source=127.0.0.1

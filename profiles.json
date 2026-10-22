@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "builds": {
+    "official-php-8.4.26-apache-trixie-amd64": {
+      "php_header": "PHP/8.4.26",
+      "server_header": "Apache/2.4.69 (Debian)",
+      "image_digest": "sha256:60111400ff77bdc44fa79b4f072afe49a42abba71e0846ad496be4761dc9c11a",
+      "libphp_path": "/usr/lib/apache2/modules/libphp.so",
+      "libphp_sha256": "51663cf883b1223436d4c99f31dd0225735ea5573665e4242621eee7f4ee679c",
+      "symbols": {
+        "zif_system": "0x465370",
+        "zval_ptr_dtor": "0x65eb60"
+      }
+    },
+    "prestashop-9.2.0-php-8.5.11-apache-amd64-uncalibrated": {
+      "php_header": "",
+      "server_header": "Apache/2.4.68 (Debian)",
+      "image_digest": "sha256:e250b65ea2457510753500667e2a2f81d58a5b2953add0bb5ded371209f1cbd0",
+      "libphp_path": "/usr/lib/apache2/modules/libphp.so",
+      "libphp_sha256": "fd2ef59b854b3659bbeb6a6b74f0c5f9962989438dfc1731ff5ab2525bf83891",
+      "symbols": {
+        "zif_system": "0x58a900",
+        "zval_ptr_dtor": "0x7a1b00"
+      }
+    },
+    "official-php-8.2.34-apache-trixie-amd64": {
+      "php_header": "PHP/8.2.34",
+      "server_header": "Apache/2.4.69 (Debian)",
+      "image_digest": "sha256:1650dcb528360aad05d6ed2f83cb403a2a39c31bd14552efd9a747b2207dea86",
+      "libphp_path": "/usr/lib/apache2/modules/libphp.so",
+      "libphp_sha256": "42ae9f69550e036ff5ad3d25d7ebf6b40bf2dd6531e8f891de53bea0d1663e9b",
+      "symbols": {
+        "zif_system": "0x39b8a0",
+        "zval_ptr_dtor": "0x487650"
+      }
+    },
+    "official-php-8.3.35-apache-trixie-amd64": {
+      "php_header": "PHP/8.3.35",
+      "server_header": "Apache/2.4.69 (Debian)",
+      "image_digest": "sha256:c59c808172ee3672cd334f8f2a5d7b1480a9d7273a368f412b8ee9b4ef418184",
+      "libphp_path": "/usr/lib/apache2/modules/libphp.so",
+      "libphp_sha256": "ea069762fa225a2d61ebf613db5686d7c29823acf641424d596f78fcaa1cdccb",
+      "symbols": {
+        "zif_system": "0x3ac080",
+        "zval_ptr_dtor": "0x49ec50"
+      }
+    },
+    "official-php-8.5.11-apache-trixie-amd64": {
+      "php_header": "PHP/8.5.11",
+      "server_header": "Apache/2.4.69 (Debian)",
+      "image_digest": "sha256:47e6d8849049375e0d19e81f1b391ed88828d4653e0d1b00822185b66b564e8b",
+      "libphp_path": "/usr/lib/apache2/modules/libphp.so",
+      "libphp_sha256": "2c80ca2a245ca1ccca9946f30ebeca210b9689bc24f2bd07eda717d70108ee5d",
+      "symbols": {
+        "zif_system": "0x5996e0",
+        "zval_ptr_dtor": "0x7b47a0"
+      }
+    },
+    "official-php-7.1.33-apache-buster-amd64": {
+      "php_header": "PHP/7.1.33",
+      "server_header": "Apache/2.4.38 (Debian)",
+      "image_digest": "sha256:70eefcf4372b279101259e905996b7733a87688d0b48625af01b55947836bb1f",
+      "libphp_path": "/usr/lib/apache2/modules/libphp7.so",
+      "libphp_sha256": "7051e920742073c398b228429e893160cd50ed549b6807bd9fd4a4582c198aee",
+      "symbols": {
+        "zif_system": "0x300420",
+        "zval_ptr_dtor": "0x3d7ce0"
+      }
+    },
+    "official-php-7.2.34-apache-buster-amd64": {
+      "php_header": "PHP/7.2.34",
+      "server_header": "Apache/2.4.38 (Debian)",
+      "image_digest": "sha256:4dc0f0115acf8c2f0df69295ae822e49f5ad5fe849725847f15aa0e5802b55f8",
+      "libphp_path": "/usr/lib/apache2/modules/libphp7.so",
+      "libphp_sha256": "aff83b482039f672ef675ceaa82dde09521a72a6ce569b4dcf5e1f54f5b7503c",
+      "symbols": {
+        "zif_system": "0x3624e0",
+        "zval_ptr_dtor": "0x441b20"
+      }
+    },
+    "official-php-7.3.33-apache-bullseye-amd64": {
+      "php_header": "PHP/7.3.33",
+      "server_header": "Apache/2.4.52 (Debian)",
+      "image_digest": "sha256:b9872cd287ef72bc17d45d713aa2742f3d3bcf2503fea2506fd93aa94995219f",
+      "libphp_path": "/usr/lib/apache2/modules/libphp7.so",
+      "libphp_sha256": "9801b6f2e7183c858c98bec90150ce7590f69e1827bb4976725211c7ea451109",
+      "symbols": {
+        "zif_system": "0x35f640",
+        "zval_ptr_dtor": "0x440dc0"
+      }
+    },
+    "official-php-7.4.33-apache-bullseye-amd64": {
+      "php_header": "PHP/7.4.33",
+      "server_header": "Apache/2.4.54 (Debian)",
+      "image_digest": "sha256:c9d7e608f73832673479770d66aacc8100011ec751d1905ff63fae3fe2e0ca6d",
+      "libphp_path": "/usr/lib/apache2/modules/libphp7.so",
+      "libphp_sha256": "5692da4ee4abb6f14b4257ca52cfdd08fc4aa9cf95fde0192445c070923a4bf0",
+      "symbols": {
+        "zif_system": "0x335850",
+        "zval_ptr_dtor": "0x417d60"
+      }
+    },
+    "official-php-7.0.33-apache-stretch-amd64": {
+      "php_header": "PHP/7.0.33",
+      "server_header": "Apache/2.4.25 (Debian)",
+      "image_digest": "sha256:1d34b2e491a02ba7a8d26478132015e197a5ffea37f0a93b42621d11cfe042cc",
+      "libphp_path": "/usr/lib/apache2/modules/libphp7.so",
+      "libphp_sha256": "bebdad934a7df94fb646a3014dc784e88c13bca2a2645eee8b213ef325108447",
+      "symbols": {
+        "zif_system": "0x3948d0",
+        "zval_ptr_dtor": "0x46c790"
+      }
+    }
+  },
+  "layouts": {
+    "trixie-reproducer-v1": {
+      "session_id_length": 19,
+      "execution_cookie_length": 32,
+      "heap_fillers": 841,
+      "array_target": 406,
+      "array_value_size": 16,
+      "hash_offset": "0x690d8",
+      "execution_fake_fields": 31,
+      "stock_leak_length": "0x190000",
+      "stock_execution_pads": 36,
+      "stock_execution_carriers": 130,
+      "stock_fake_fields": 15,
+      "stock_reference_field": 1,
+      "stock_reference_offset": "0x48",
+      "fake_payload_size": 167,
+      "fake_execute_data_offset": "0x20",
+      "fake_command_zval_offset": "0x80",
+      "fake_command_offset": "0x98",
+      "command_limit": 14,
+      "auto_capture_command_size": 12
+    },
+    "trixie-stock-session-v1": {
+      "session_id_length": 19,
+      "execution_cookie_length": 32,
+      "heap_fillers": 841,
+      "array_target": 406,
+      "array_value_size": 16,
+      "hash_offset": "0x740d8",
+      "execution_fake_fields": 31,
+      "stock_leak_length": "0x190000",
+      "stock_execution_pads": 36,
+      "stock_execution_carriers": 130,
+      "stock_fake_fields": 15,
+      "stock_reference_field": 1,
+      "stock_reference_offset": "0x48",
+      "fake_payload_size": 167,
+      "fake_execute_data_offset": "0x20",
+      "fake_command_zval_offset": "0x80",
+      "fake_command_offset": "0x98",
+      "command_limit": 14,
+      "auto_capture_command_size": 12
+    }
+  },
+  "profiles": {
+    "official-php-8.4.26-apache-trixie-stock-preapp": {
+      "mode": "stock",
+      "build": "official-php-8.4.26-apache-trixie-amd64",
+      "layout": "trixie-reproducer-v1",
+      "auto_select": true,
+      "probe_bytes": 9437184,
+      "probe_contains": [
+        "POST Content-Length",
+        "limit of 8388608 bytes"
+      ],
+      "huge_megabytes": 140,
+      "minimum_huge_megabytes": 129
+    },
+    "official-php-8.4.26-apache-trixie-lab": {
+      "mode": "lab",
+      "build": "official-php-8.4.26-apache-trixie-amd64",
+      "layout": "trixie-reproducer-v1",
+      "auto_select": true,
+      "probe_bytes": 9437184,
+      "probe_contains": [
+        "Allowed memory size of 8388608 bytes exhausted"
+      ],
+      "huge_megabytes": 12,
+      "minimum_huge_megabytes": 9
+    },
+    "official-php-8.4.26-apache-trixie-stock-session": {
+      "mode": "stock-session",
+      "build": "official-php-8.4.26-apache-trixie-amd64",
+      "layout": "trixie-stock-session-v1",
+      "auto_select": false,
+      "probe_bytes": 9437184,
+      "probe_contains": [
+        "POST Content-Length",
+        "limit of 8388608 bytes"
+      ],
+      "huge_megabytes": 12,
+      "minimum_huge_megabytes": 1
+    }
+  }
+}

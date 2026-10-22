@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+.DS_Store
+lab/**/.env
+lab/**/data/

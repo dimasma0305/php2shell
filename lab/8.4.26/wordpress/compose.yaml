@@ -1,0 +1,23 @@
+services:
+  php-cve-wp-db:
+    image: mariadb@sha256:f16d7a344413e519dff518f27bdb221388f84b0d274c97c4fb5f2cb0dc1b34fa
+    environment:
+      MARIADB_DATABASE: wordpress
+      MARIADB_USER: wpuser
+      MARIADB_PASSWORD: wplab1
+      MARIADB_ROOT_PASSWORD: root-lab-password
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+    volumes:
+      - ./src/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+  wordpress:
+    build: .
+    depends_on:
+      php-cve-wp-db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:18173:80"
