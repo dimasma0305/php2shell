@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Render the verified CodeIgniter PoC with a pinned VHS container."""
+"""Record a live CodeIgniter lab exploit with a pinned VHS container."""
 
 from __future__ import annotations
 
 import argparse
+import re
 import subprocess
-import sys
 import time
 import urllib.error
 import urllib.request
@@ -17,6 +17,11 @@ VHS_IMAGE = (
     "sha256:ea49a6a1c529be83153e88321892b5585964418f0b9055e8c1e0d732194234a3"
 )
 PROOF_MARKER = "PROOF: callback path="
+LIVE_COMMAND = (
+    "python3 -u poc.py --url http://127.0.0.1:18087/ --retries 1"
+)
+ANSI_ESCAPE = re.compile(r"\x1b(?:\[[0-?]*[ -/]*[@-~]|\][^\x07]*(?:\x07|\x1b\\))")
+RECORDER_CONTAINER = "php2shell-vhs-live"
 OUTPUTS = (
     Path("docs/demo/php2shell-codeigniter.gif"),
     Path("docs/demo/php2shell-codeigniter.mp4"),
@@ -25,8 +30,16 @@ OUTPUTS = (
 )
 
 
-def command(args: list[str], root: Path, *, check: bool = True) -> int:
-    completed = subprocess.run(args, cwd=root, check=False)
+def command(
+    args: list[str], root: Path, *, check: bool = True, quiet: bool = False
+) -> int:
+    completed = subprocess.run(
+        args,
+        cwd=root,
+        check=False,
+        stdout=subprocess.DEVNULL if quiet else None,
+        stderr=subprocess.DEVNULL if quiet else None,
+    )
     if check and completed.returncode:
         raise RuntimeError(
             f"command failed ({completed.returncode}): {' '.join(args)}"
@@ -37,6 +50,18 @@ def command(args: list[str], root: Path, *, check: bool = True) -> int:
 def remove_outputs(root: Path) -> None:
     for relative in OUTPUTS:
         (root / relative).unlink(missing_ok=True)
+
+
+def clean_proof_output(output: str) -> str:
+    plain = ANSI_ESCAPE.sub("", output).replace("\r", "")
+    start = plain.find("[*] fingerprint status=")
+    marker = plain.find(PROOF_MARKER, start)
+    if start < 0 or marker < 0:
+        raise RuntimeError("live output does not contain a complete proof")
+    end = plain.find("\n", marker)
+    if end < 0:
+        end = len(plain)
+    return plain[start:end].rstrip() + "\n"
 
 
 def wait_for_lab(url: str, timeout: float = 30.0) -> None:
@@ -52,39 +77,28 @@ def wait_for_lab(url: str, timeout: float = 30.0) -> None:
     raise RuntimeError(f"lab did not become ready within {timeout:.0f}s: {url}")
 
 
-def run_poc(root: Path, lab_url: str) -> bool:
-    proof_path = root / OUTPUTS[3]
-    with proof_path.open("w", encoding="utf-8", newline="") as proof:
-        try:
-            completed = subprocess.run(
-                [
-                    sys.executable,
-                    "poc.py",
-                    "--url",
-                    lab_url,
-                    "--retries",
-                    "1",
-                ],
-                cwd=root,
-                stdout=proof,
-                stderr=subprocess.STDOUT,
-                timeout=600,
-                check=False,
-            )
-        except subprocess.TimeoutExpired:
-            proof.write("\nPOC_TIMEOUT\n")
-            return False
-    output = proof_path.read_text(encoding="utf-8", errors="replace")
-    return completed.returncode == 0 and PROOF_MARKER in output
-
-
 def render_once(root: Path) -> bool:
+    tape = (root / "docs/demo/codeigniter.tape").read_text(encoding="utf-8")
+    if LIVE_COMMAND not in tape:
+        raise RuntimeError("VHS tape and documented live command have diverged")
     volume = f"{root}:/vhs"
     command(
+        ["docker", "rm", "-f", RECORDER_CONTAINER],
+        root,
+        check=False,
+        quiet=True,
+    )
+    status = command(
         [
             "docker",
             "run",
             "--rm",
+            "--name",
+            RECORDER_CONTAINER,
+            "--network",
+            "codeigniter_default",
+            "-p",
+            "8000:8000",
             "-v",
             volume,
             "-w",
@@ -93,10 +107,21 @@ def render_once(root: Path) -> bool:
             "docs/demo/codeigniter.tape",
         ],
         root,
+        check=False,
     )
-    transcript = (root / OUTPUTS[2]).read_text(encoding="utf-8", errors="replace")
-    proof_log = (root / OUTPUTS[3]).read_text(encoding="utf-8", errors="replace")
-    return PROOF_MARKER in transcript and PROOF_MARKER in proof_log
+    if status:
+        return False
+    proof_path = root / OUTPUTS[3]
+    if not proof_path.is_file():
+        return False
+    proof_log = proof_path.read_text(encoding="utf-8", errors="replace")
+    if PROOF_MARKER not in proof_log:
+        return False
+    proof_log = clean_proof_output(proof_log)
+    proof_path.write_text(proof_log, encoding="utf-8", newline="\n")
+    transcript = f"$ {LIVE_COMMAND}\n{proof_log}"
+    (root / OUTPUTS[2]).write_text(transcript, encoding="utf-8", newline="\n")
+    return PROOF_MARKER in transcript
 
 
 def parse_args() -> argparse.Namespace:
@@ -137,14 +162,20 @@ def main() -> int:
             command(compose_command + ["up", "-d", "--build"], root)
             wait_for_lab(lab_url)
             remove_outputs(root)
-            if run_poc(root, lab_url) and render_once(root):
+            if render_once(root):
                 success = True
-                print("[+] VHS transcript contains fresh callback proof", flush=True)
+                print("[+] live VHS run contains fresh callback proof", flush=True)
                 for output in OUTPUTS:
                     print(f"[+] {output}", flush=True)
                 return 0
             print("[!] no proof on this master; retrying from a fresh container", flush=True)
     finally:
+        command(
+            ["docker", "rm", "-f", RECORDER_CONTAINER],
+            root,
+            check=False,
+            quiet=True,
+        )
         if not args.keep_lab:
             command(compose_command + ["down", "--remove-orphans"], root, check=False)
         if not success:

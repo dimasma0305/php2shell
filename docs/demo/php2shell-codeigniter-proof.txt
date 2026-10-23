@@ -5,24 +5,24 @@
 [*] application route: CodeIgniter 4 default welcome page
 [*] prefork worker wave: auto-selected 5 workers
 [*] prefork reset wave: skipped; four workers remain pristine
-[*] callback proof: listen=0.0.0.0:8000 path=/5i
+[*] callback proof: listen=0.0.0.0:8000 path=/q4
 [*] heap worker wave 1/1
-[*] leak_heap worker wave: [(0, '0x7fc2bf000000', ''), (1, '0x7fc2bf000000', ''), (2, '0x7fc2bf000000', ''), (3, '0x7fc2bf000000', ''), (4, '0x7fc2bf000000', '')]
+[*] leak_heap worker wave: [(0, '0x7ff415200000', ''), (1, '0x7ff415200000', ''), (2, '0x7ff415200000', ''), (3, '0x7ff415200000', ''), (4, '0x7ff415200000', '')]
 [*] requesting a fresh prefork worker
 [*] requesting a fresh prefork worker
 [*] requesting a fresh prefork worker
 [*] requesting a fresh prefork worker
 [*] requesting a fresh prefork worker
-[+] heap chunk base: 0x7fc2bf000000
+[+] heap chunk base: 0x7ff415200000
 [*] libphp worker wave 1/1
-[*] leak_libphp worker wave: [(0, '0x7fc2c0ce8000', ''), (1, '0x7fc2c0ce8000', ''), (2, '0x7fc2c0ce8000', ''), (3, '0x7fc2c0ce8000', ''), (4, '0x7fc2c0ce8000', '')]
+[*] leak_libphp worker wave: [(0, '0x7ff416e21000', ''), (1, '0x7ff416e21000', ''), (2, '0x7ff416e21000', ''), (3, '0x7ff416e21000', ''), (4, '0x7ff416e21000', '')]
 [*] requesting a fresh prefork worker
 [*] requesting a fresh prefork worker
 [*] requesting a fresh prefork worker
 [*] requesting a fresh prefork worker
 [*] requesting a fresh prefork worker
-[+] libphp base: 0x7fc2c0ce8000
-[*] execution addresses: table=0x7fc2bf0690d8 zif_system=0x7fc2c114d370
+[+] libphp base: 0x7ff416e21000
+[*] execution addresses: table=0x7ff4152690d8 zif_system=0x7ff417286370
 [*] execution worker wave 1/1
-[*] execution worker wave: [(0, 'IncompleteRead: IncompleteRead(6 bytes read)'), (1, 'IncompleteRead: IncompleteRead(6 bytes read)'), (2, 'RemoteDisconnected: Remote end closed connection without response'), (3, 'RemoteDisconnected: Remote end closed connection without response'), (4, 'IncompleteRead: IncompleteRead(6 bytes read)')]
-PROOF: callback path=/5i source=127.0.0.1
+[*] execution worker wave: [(0, 'IncompleteRead: IncompleteRead(6 bytes read)'), (1, 'IncompleteRead: IncompleteRead(6 bytes read)'), (2, 'IncompleteRead: IncompleteRead(6 bytes read)'), (3, 'IncompleteRead: IncompleteRead(6 bytes read)'), (4, 'IncompleteRead: IncompleteRead(6 bytes read)')]
+PROOF: callback path=/q4 source=172.19.0.1
