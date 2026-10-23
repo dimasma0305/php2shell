@@ -1886,6 +1886,7 @@ def main() -> int:
         if not re.fullmatch(r"[A-Za-z0-9._-]+", proof_name):
             cli.error("--proof-file must end in a simple filename for the default command")
         args.command = f"id>/out/{proof_name}"
+        print("proof_command=id", flush=True)
     elif args.command is None:
         if args.fetch:
             remote_name = urllib.parse.urlsplit(args.fetch).path.rsplit("/", 1)[-1]
@@ -1909,6 +1910,7 @@ def main() -> int:
             args.generated_remote_proof = True
         if not args.expect_proof:
             args.expect_proof = "uid="
+        print("proof_command=id", flush=True)
         print(f"[*] remote proof path: {args.fetch}", flush=True)
     elif proof_path is None and not args.generated_callback_proof:
         if not args.fetch:
