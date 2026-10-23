@@ -12,7 +12,7 @@ CVE-2026-109619. On the verified PHP 8.4.26 Apache layout, it leaks the Zend MM
 heap and loaded `libphp` bases. An RCE result is accepted only when the exploit
 executes `id` and retrieves fresh output containing both `uid=` and `gid=`.
 
-![Verified WordPress id output](docs/screenshots/wordpress-proof.png)
+![Live WordPress PoC with id output](docs/demo/wordpress.gif)
 
 ## Quick Start
 
@@ -21,7 +21,7 @@ git clone https://github.com/dimasma0305/php2shell.git
 cd php2shell
 
 docker compose -f lab/8.4.26/wordpress/compose.yaml up -d --build
-./poc.py --url http://127.0.0.1:18173/
+python3 -u poc.py --url http://127.0.0.1:18173/
 ```
 
 On Windows, run `python poc.py --url http://127.0.0.1:18173/`.
@@ -31,6 +31,10 @@ A successful run ends with fresh target output:
 ```text
 PROOF: uid=33(www-data) gid=33(www-data) groups=33(www-data)
 ```
+
+Each lab section below has its own VHS recording of the displayed `poc.py`
+command and its output against that running lab. The Docker setup and teardown
+commands are operator steps outside the recording.
 
 Stop the lab when finished:
 
@@ -43,14 +47,14 @@ docker compose -f lab/8.4.26/wordpress/compose.yaml down -v
 Every linked lab has retained output. The status describes only the exact
 application, PHP build, and proof level in that row.
 
-| PHP | Lab | Status | Proof |
-| --- | --- | --- | --- |
-| 8.4.26 | [WordPress](lab/8.4.26/wordpress/) | **RCE verified** | [Output](docs/evidence/wordpress-proof.txt) |
-| 8.4.26 | [MediaWiki](lab/8.4.26/mediawiki/) | **RCE verified** | [Output](docs/evidence/mediawiki-proof.txt) |
-| 8.4.26 | [DokuWiki](lab/8.4.26/dokuwiki/) | **RCE verified twice** | [Run 1](docs/evidence/dokuwiki-proof.txt), [run 2](docs/evidence/dokuwiki-proof-run2.txt) |
-| 8.4.26 | [Joomla](lab/8.4.26/joomla/) | **RCE verified twice** | [Run 1](docs/evidence/joomla-proof.txt), [run 2](docs/evidence/joomla-proof-run2.txt) |
-| 8.4.26 | [PHP/Apache](lab/8.4.26/php-apache/) | **RCE verified** | [Output](docs/evidence/php-apache-proof.txt) |
-| 8.4.26 | [CodeIgniter](lab/8.4.26/codeigniter/) | **Callback primitive verified; RCE proof pending** | [Run 1](docs/evidence/codeigniter-proof.txt), [run 2](docs/evidence/codeigniter-proof-run2.txt) |
+| PHP | Lab | Status | Live VHS | Output |
+| --- | --- | --- | --- | --- |
+| 8.4.26 | [WordPress](lab/8.4.26/wordpress/) | **RCE verified** | [Watch](docs/demo/wordpress.gif) | [Fresh output](docs/demo/wordpress-proof.txt) |
+| 8.4.26 | [MediaWiki](lab/8.4.26/mediawiki/) | **RCE verified** | [Watch](docs/demo/mediawiki.gif) | [Fresh output](docs/demo/mediawiki-proof.txt) |
+| 8.4.26 | [DokuWiki](lab/8.4.26/dokuwiki/) | **RCE verified twice** | [Watch](docs/demo/dokuwiki.gif) | [Fresh output](docs/demo/dokuwiki-proof.txt) |
+| 8.4.26 | [Joomla](lab/8.4.26/joomla/) | **RCE verified twice** | [Watch](docs/demo/joomla.gif) | [Fresh output](docs/demo/joomla-proof.txt) |
+| 8.4.26 | [PHP/Apache](lab/8.4.26/php-apache/) | **RCE verified** | [Watch](docs/demo/php-apache.gif) | [Fresh output](docs/demo/php-apache-proof.txt) |
+| 8.4.26 | [CodeIgniter](lab/8.4.26/codeigniter/) | **Callback primitive verified; RCE proof pending** | [Watch](docs/demo/php2shell-codeigniter-live.gif) | [Callback output](docs/demo/php2shell-codeigniter-live-proof.txt) |
 
 ### WordPress
 
@@ -59,13 +63,15 @@ The main fixture uses WordPress commit
 
 ```bash
 docker compose -f lab/8.4.26/wordpress/compose.yaml up -d --build
-./poc.py --url http://127.0.0.1:18173/
+python3 -u poc.py --url http://127.0.0.1:18173/
 docker compose -f lab/8.4.26/wordpress/compose.yaml down -v
 ```
 
-![Verified WordPress proof](docs/screenshots/wordpress-proof.png)
+![Live WordPress PoC and id output](docs/demo/wordpress.gif)
 
-[View the retained output](docs/evidence/wordpress-proof.txt).
+[VHS tape](docs/demo/wordpress.tape) · [MP4](docs/demo/wordpress.mp4) ·
+[output from this take](docs/demo/wordpress-proof.txt) ·
+[earlier proof](docs/evidence/wordpress-proof.txt)
 
 ### MediaWiki
 
@@ -75,11 +81,15 @@ MediaWiki's default writable `images/` directory.
 ```bash
 docker build -t php2shell-mediawiki lab/8.4.26/mediawiki
 docker run --rm -d --name php2shell-mediawiki -p 127.0.0.1:18081:80 php2shell-mediawiki
-./poc.py --url http://127.0.0.1:18081/
+python3 -u poc.py --url http://127.0.0.1:18081/
 docker rm -f php2shell-mediawiki
 ```
 
-[View the retained output](docs/evidence/mediawiki-proof.txt).
+![Live MediaWiki PoC and id output](docs/demo/mediawiki.gif)
+
+[VHS tape](docs/demo/mediawiki.tape) · [MP4](docs/demo/mediawiki.mp4) ·
+[output from this take](docs/demo/mediawiki-proof.txt) ·
+[earlier proof](docs/evidence/mediawiki-proof.txt)
 
 ### DokuWiki
 
@@ -89,12 +99,16 @@ the affected PHP runtime.
 ```bash
 docker build -t php2shell-dokuwiki lab/8.4.26/dokuwiki
 docker run --rm -d --name php2shell-dokuwiki -p 127.0.0.1:18083:80 php2shell-dokuwiki
-./poc.py --url http://127.0.0.1:18083/
+python3 -u poc.py --url http://127.0.0.1:18083/
 docker rm -f php2shell-dokuwiki
 ```
 
-[View run 1](docs/evidence/dokuwiki-proof.txt) and
-[run 2](docs/evidence/dokuwiki-proof-run2.txt).
+![Live DokuWiki PoC and id output](docs/demo/dokuwiki.gif)
+
+[VHS tape](docs/demo/dokuwiki.tape) · [MP4](docs/demo/dokuwiki.mp4) ·
+[output from this take](docs/demo/dokuwiki-proof.txt) ·
+[earlier runs](docs/evidence/dokuwiki-proof.txt),
+[run 2](docs/evidence/dokuwiki-proof-run2.txt)
 
 ### Joomla
 
@@ -104,12 +118,16 @@ affected PHP runtime.
 ```bash
 docker build -t php2shell-joomla lab/8.4.26/joomla
 docker run --rm -d --name php2shell-joomla -p 127.0.0.1:18086:80 php2shell-joomla
-./poc.py --url http://127.0.0.1:18086/
+python3 -u poc.py --url http://127.0.0.1:18086/ --skip-warmup
 docker rm -f php2shell-joomla
 ```
 
-[View run 1](docs/evidence/joomla-proof.txt) and
-[run 2](docs/evidence/joomla-proof-run2.txt).
+![Live Joomla PoC and id output](docs/demo/joomla.gif)
+
+[VHS tape](docs/demo/joomla.tape) · [MP4](docs/demo/joomla.mp4) ·
+[output from this take](docs/demo/joomla-proof.txt) ·
+[earlier runs](docs/evidence/joomla-proof.txt),
+[run 2](docs/evidence/joomla-proof-run2.txt)
 
 ### PHP/Apache
 
@@ -119,11 +137,15 @@ application-level `session_start()` call.
 ```bash
 docker build -t php2shell-php-apache lab/8.4.26/php-apache
 docker run --rm -d --name php2shell-php-apache -p 127.0.0.1:18082:80 php2shell-php-apache
-./poc.py --url http://127.0.0.1:18082/
+python3 -u poc.py --url http://127.0.0.1:18082/
 docker rm -f php2shell-php-apache
 ```
 
-[View the retained output](docs/evidence/php-apache-proof.txt).
+![Live PHP Apache PoC and id output](docs/demo/php-apache.gif)
+
+[VHS tape](docs/demo/php-apache.tape) · [MP4](docs/demo/php-apache.mp4) ·
+[output from this take](docs/demo/php-apache-proof.txt) ·
+[earlier proof](docs/evidence/php-apache-proof.txt)
 
 ### CodeIgniter
 
@@ -142,15 +164,18 @@ Record a fresh live run after starting the real lab:
 
 ```bash
 docker compose -f lab/8.4.26/codeigniter/compose.yaml up -d --build
-vhs docs/demo/codeigniter-live.tape
+docker build -f docs/demo/recorder.Dockerfile -t php2shell-vhs-recorder docs/demo
+docker run --rm --network codeigniter_default -p 8000:8000 \
+  -v "$PWD:/vhs" -w /vhs php2shell-vhs-recorder docs/demo/codeigniter-live.tape
 docker compose -f lab/8.4.26/codeigniter/compose.yaml down -v
 ```
 
 ![Live CodeIgniter callback demonstration](docs/demo/php2shell-codeigniter-live.gif)
 
+[VHS tape](docs/demo/codeigniter-live.tape) ·
 [MP4](docs/demo/php2shell-codeigniter-live.mp4) ·
 [raw output](docs/demo/php2shell-codeigniter-live-proof.txt) ·
-[terminal transcript](docs/demo/php2shell-codeigniter-live.txt)
+[recorder image](docs/demo/recorder.Dockerfile)
 
 This video records the public PoC against the real lab in the same take. It is
 evidence of the narrower callback primitive only. The CodeIgniter heap layout
@@ -181,7 +206,7 @@ Useful profile checks:
 ```bash
 ./poc.py --list-builds
 ./poc.py --list-profiles
-./poc.py --url http://127.0.0.1:18173/ --check-profile
+python3 -u poc.py --url http://127.0.0.1:18173/ --check-profile
 ```
 
 ## Reference

