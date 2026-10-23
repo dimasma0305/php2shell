@@ -142,7 +142,7 @@ Record a fresh live run after starting the real lab:
 
 ```bash
 docker compose -f lab/8.4.26/codeigniter/compose.yaml up -d --build
-vhs docs/demo/codeigniter.tape
+vhs docs/demo/codeigniter-live.tape
 docker compose -f lab/8.4.26/codeigniter/compose.yaml down -v
 ```
 
