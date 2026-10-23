@@ -1,5 +1,6 @@
 __pycache__/
 *.pyc
 .DS_Store
+scripts/
 lab/**/.env
 lab/**/data/

@@ -1,5 +1,5 @@
-Output docs/demo/php2shell-codeigniter.gif
-Output docs/demo/php2shell-codeigniter.mp4
+Output docs/demo/php2shell-codeigniter-live.gif
+Output docs/demo/php2shell-codeigniter-live.mp4
 
 Require python3
 Require tee
@@ -20,11 +20,8 @@ Set BorderRadius 8
 Set CursorBlink false
 
 Hide
-Type "exec > >(tee docs/demo/php2shell-codeigniter-proof.txt) 2>&1"
+Type "exec > >(tee docs/demo/php2shell-codeigniter-live-proof.txt) 2>&1"
 Enter
-Type "python3 scripts/demo_loopback_proxy.py >/tmp/php2shell-demo-proxy.log 2>&1 &"
-Enter
-Sleep 1s
 Type "clear"
 Enter
 Show

@@ -9,10 +9,10 @@
 
 `php2shell` is a reproducible proof of concept for CVE-2026-109618 and
 CVE-2026-109619. On the verified PHP 8.4.26 Apache layout, it leaks the Zend MM
-heap and loaded `libphp` bases, then proves command execution through a fresh
-HTTP file or callback result.
+heap and loaded `libphp` bases. An RCE result is accepted only when the exploit
+executes `id` and retrieves fresh output containing both `uid=` and `gid=`.
 
-![Verified php2shell CodeIgniter demonstration](docs/demo/php2shell-codeigniter.gif)
+![Verified WordPress id output](docs/screenshots/wordpress-proof.png)
 
 ## Quick Start
 
@@ -40,8 +40,8 @@ docker compose -f lab/8.4.26/wordpress/compose.yaml down -v
 
 ## Labs
 
-Every linked lab has a retained successful proof. The status describes only
-the exact application and PHP build in that row.
+Every linked lab has retained output. The status describes only the exact
+application, PHP build, and proof level in that row.
 
 | PHP | Lab | Status | Proof |
 | --- | --- | --- | --- |
@@ -50,7 +50,7 @@ the exact application and PHP build in that row.
 | 8.4.26 | [DokuWiki](lab/8.4.26/dokuwiki/) | **RCE verified twice** | [Run 1](docs/evidence/dokuwiki-proof.txt), [run 2](docs/evidence/dokuwiki-proof-run2.txt) |
 | 8.4.26 | [Joomla](lab/8.4.26/joomla/) | **RCE verified twice** | [Run 1](docs/evidence/joomla-proof.txt), [run 2](docs/evidence/joomla-proof-run2.txt) |
 | 8.4.26 | [PHP/Apache](lab/8.4.26/php-apache/) | **RCE verified** | [Output](docs/evidence/php-apache-proof.txt) |
-| 8.4.26 | [CodeIgniter](lab/8.4.26/codeigniter/) | **RCE verified twice; layout dependent** | [Run 1](docs/evidence/codeigniter-proof.txt), [run 2](docs/evidence/codeigniter-proof-run2.txt) |
+| 8.4.26 | [CodeIgniter](lab/8.4.26/codeigniter/) | **Callback primitive verified; RCE proof pending** | [Run 1](docs/evidence/codeigniter-proof.txt), [run 2](docs/evidence/codeigniter-proof-run2.txt) |
 
 ### WordPress
 
@@ -128,8 +128,9 @@ docker rm -f php2shell-php-apache
 ### CodeIgniter
 
 This fixture uses CodeIgniter appstarter `4.7.4` with framework `4.7.5`. Its
-proof is a fresh callback because the default application has no suitable
-web-readable writable directory.
+retained runs show a fresh command-triggered callback because the default
+application has no suitable web-readable writable directory. The callback does
+not include `id` output, so it is not labeled verified RCE.
 
 ```bash
 docker compose -f lab/8.4.26/codeigniter/compose.yaml up -d --build
@@ -137,21 +138,23 @@ python3 -u poc.py --url http://127.0.0.1:18087/ --retries 1
 docker compose -f lab/8.4.26/codeigniter/compose.yaml down -v
 ```
 
-Generate a fresh proof-gated recording:
+Record a fresh live run after starting the real lab:
 
 ```bash
-python scripts/render_codeigniter_demo.py
+docker compose -f lab/8.4.26/codeigniter/compose.yaml up -d --build
+vhs docs/demo/codeigniter.tape
+docker compose -f lab/8.4.26/codeigniter/compose.yaml down -v
 ```
 
-![Verified CodeIgniter PoC](docs/demo/php2shell-codeigniter.gif)
+![Live CodeIgniter callback demonstration](docs/demo/php2shell-codeigniter-live.gif)
 
-[MP4](docs/demo/php2shell-codeigniter.mp4) ·
-[raw output](docs/demo/php2shell-codeigniter-proof.txt) ·
-[terminal transcript](docs/demo/php2shell-codeigniter.txt)
+[MP4](docs/demo/php2shell-codeigniter-live.mp4) ·
+[raw output](docs/demo/php2shell-codeigniter-live-proof.txt) ·
+[terminal transcript](docs/demo/php2shell-codeigniter-live.txt)
 
-The CodeIgniter heap layout depends on the fresh Apache master's ASLR and
-allocator state. The renderer retries fresh masters and retains output only
-after the callback succeeds.
+This video records the public PoC against the real lab in the same take. It is
+evidence of the narrower callback primitive only. The CodeIgniter heap layout
+also depends on the fresh Apache master's ASLR and allocator state.
 
 ## Requirement of the Exploit
 
@@ -166,8 +169,9 @@ after the callback succeeds.
   heap and `libphp` bases.
 - Enough accepted request size and memory for the roughly 140 MiB calibrated
   request.
-- An observable proof path: a known web-readable writable directory or a
-  callback route from the target to the listener.
+- An attacker-visible route that returns the fresh stdout of `id`, including
+  both `uid=` and `gid=`. A callback path by itself is insufficient for the
+  **RCE verified** label.
 
 Unknown profiles fail closed. PHP 8.2.35, 8.3.36, 8.4.27, and 8.5.12 contain
 the upstream fixes and are not supported targets.
