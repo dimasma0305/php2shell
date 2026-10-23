@@ -1,9 +1,7 @@
 services:
   codeigniter:
     build: .
-    # The application and PHP configuration remain stock.  This short alias
-    # gives the 14-byte command payload a route to poc.py's proof listener.
-    extra_hosts:
-      - "x:host-gateway"
+    # The app remains stock. The PoC container joins this network with the
+    # short alias x so its 14-byte command can return stdout to the listener.
     ports:
       - "127.0.0.1:18087:80"

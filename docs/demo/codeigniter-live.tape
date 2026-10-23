@@ -32,6 +32,6 @@ Show
 
 Type "python3 -u poc.py --url http://127.0.0.1:18087/ --retries 1"
 Enter
-Sleep 45s
+Sleep 35s
 Enter
 Sleep 2s
