@@ -205,6 +205,35 @@ wave consistently. Retrying against the same master does not remove that
 limitation. The result proves RCE for the retained affected layout, not a
 universal black-box exploit for every CodeIgniter deployment.
 
+### Reproducible PoC video
+
+The CodeIgniter terminal demo is defined as a
+[VHS tape](docs/demo/codeigniter.tape). Its operator wrapper starts a fresh
+Apache master for every attempt, renders with pinned VHS `v0.12.1`, and keeps
+the GIF, MP4, and terminal transcript only when the transcript contains the
+PoC's fresh callback proof:
+
+```bash
+python scripts/render_codeigniter_demo.py
+```
+
+![Proof-gated CodeIgniter PoC terminal demo](docs/demo/php2shell-codeigniter.gif)
+
+The retained run is also available as
+[`MP4`](docs/demo/php2shell-codeigniter.mp4),
+[`raw PoC output`](docs/demo/php2shell-codeigniter-proof.txt), and
+[`VHS terminal transcript`](docs/demo/php2shell-codeigniter.txt).
+
+The renderer uses the official VHS container pinned to
+`sha256:ea49a6a1c529be83153e88321892b5585964418f0b9055e8c1e0d732194234a3`.
+The operator wrapper runs the public `poc.py` against each fresh loopback lab,
+requires exit code zero plus a fresh callback marker, and only then asks VHS to
+render that same run's stdout. It mounts this repository read-write into VHS
+for the generated files, but does not mount the Docker socket or give `poc.py`
+access to Docker. The long exploit wait is omitted from the video. The raw
+evidence logs above remain the source of the RCE claim; the video is a derived
+demonstration.
+
 ## Hard exploitation requirements
 
 The current exploit chain needs all of the following. Missing one should be
@@ -320,7 +349,15 @@ candidate only to an isolated local lab and require a fresh self-verified proof.
 ├── poc.py
 ├── profiles.json
 ├── README.md
+├── scripts/
+│   └── render_codeigniter_demo.py
 ├── docs/
+│   ├── demo/
+│   │   ├── codeigniter.tape
+│   │   ├── php2shell-codeigniter.gif
+│   │   ├── php2shell-codeigniter.mp4
+│   │   ├── php2shell-codeigniter-proof.txt
+│   │   └── php2shell-codeigniter.txt
 │   ├── evidence/
 │   └── screenshots/
 └── lab/
@@ -347,6 +384,7 @@ candidate only to an isolated local lab and require a fresh self-verified proof.
 - [Upstream PHP 8.5.11 to 8.5.12 diff](https://github.com/php/php-src/compare/php-8.5.11...php-8.5.12)
 - [Calif: PHP use-after-free research](https://calif.io/research/php-uaf)
 - [Calif: php2shell](https://calif.io/php2shell/)
+- [Charmbracelet VHS](https://github.com/charmbracelet/vhs)
 
 The released client is restricted to the included local labs. Review
 [`AUTHORIZED_USE.md`](AUTHORIZED_USE.md) before use.
