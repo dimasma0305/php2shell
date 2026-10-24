@@ -1,54 +1,36 @@
-# Defender experiments: PHP OOM and upload progress
+# Defender signals for PHP upload progress
 
-This package contains two **experimental, alert-only** signals. The network
-rule recognizes one published PoC producer shape. The worker-sequence reference
-evaluator correlates a startup OOM with reuse of that same Apache worker and
-connection. Neither signal proves memory corruption or RCE.
+Two experimental, alert-only signals were tested in local PHP/Apache labs. They identify candidate requests and worker behavior; neither proves memory corruption or RCE.
 
-## Published producer shape: Suricata
+## Detection index
 
-The Suricata rule detects
-the multipart producer request shape used by the published `poc.py` against the
-PHP 8.4.26 Apache lab. An alert means **attempted trigger shape observed**. It
-does not establish memory corruption or RCE on its own, and the same request
-shape remains alertable on patched PHP 8.4.27.
+| Detection | Claim | Sensor | Lab cases |
+| --- | --- | --- | --- |
+| [php-upload-progress-producer](#php-upload-progress-producer) | attempted_trigger | ingress | TP=2 FP=0 TN=2 FN=0 |
+| [php-startup-oom-reused-worker](#php-startup-oom-reused-worker) | attempted_trigger | runtime | TP=1 FP=0 TN=3 FN=0 |
 
-The rule inspects plaintext HTTP after TLS termination. It looks for a POST
-multipart request with the PoC's 17-character `S` boundary and the
-`PHP_SESSION_UPLOAD_PROGRESS` field. The fixed boundary makes the rule precise
-for this published producer, but an attacker can change it. General detection
-would need application/session telemetry and Apache worker-failure correlation.
+## php-upload-progress-producer
 
-## Live lab results
+### Claim and scope
 
-| Case | Lab and input | Expected | Suricata alerts | Evidence |
-| --- | --- | --- | ---: | --- |
-| Affected positive | PHP 8.4.26 Apache, public `poc.py` (`id` returned) | Alert | 2 | [Case](evidence/affected-positive.json) · [raw EVE](evidence/raw/affected-positive.jsonl) |
-| Patched control | PHP 8.4.27 Apache, same detected multipart field and boundary | Alert | 1 | [Case](evidence/patched-control.json) · [raw EVE](evidence/raw/patched-control.jsonl) |
-| Benign | PHP 8.4.26, ordinary multipart upload-progress form with a normal boundary | No alert | 0 | [Case](evidence/benign.json) · [raw EVE](evidence/raw/benign.jsonl) |
-| Near miss | PHP 8.4.26, PoC boundary without upload-progress field | No alert | 0 | [Case](evidence/near-miss.json) · [raw EVE](evidence/raw/near-miss.jsonl) |
+Claim: attempted_trigger. Status: experimental. The rule saw the published PoC's multipart upload-progress request shape. The patched lab also alerts because it receives the same attempt shape.
 
-The case labels and alert links are checked by
-[`validation.json`](validation.json). The four case outcomes are TP=2, FP=0,
-TN=2, FN=0 **for these exact lab requests**; the patched alert counts as a true
-positive because this rule detects an attempt. This is not a production false
-positive rate. The 140 MB PoC run caused 1,238 kernel packet drops in the
-Suricata sidecar. It still emitted two alerts, but packet loss can hide other
-requests. Do not infer complete coverage from these four cases.
+### Telemetry and rule
 
-## Reproduce the sensor path
+Suricata 8.0.7 reads plaintext HTTP on the Apache container's `eth0`. The [analytic](detections/php-upload-progress-producer.yaml) describes the signal; the [rule](rules/suricata/php-upload-progress-producer.rules) matches the PoC's 17-character `S` boundary and `PHP_SESSION_UPLOAD_PROGRESS` field.
 
-Build and start the [PHP/Apache lab](../lab/8.4.26/php-apache/) on
-`127.0.0.1:18082` as documented in the repository README. Use Suricata 8.0.7
-image digest `sha256:bf4bea5b45d9c10265a3ee6628e2ec8930b9d1fb7caf9d1afb63af413b9cbb26`.
-Run it in the lab container's network namespace with `NET_RAW` and `NET_ADMIN`,
-mount [the rule](rules/suricata/php-upload-progress-producer.rules) read-only,
-and enable EVE logging on `eth0`. Test syntax with `suricata -T -S <rule>`.
-Then run `python -u poc.py --url http://127.0.0.1:18082/ --retries 1` from the
-repository root. An EVE alert with SID `9000618` is the detector result;
-`PROOF: uid=... gid=...` from `poc.py` is the separate RCE result.
+### Evidence
 
-For a Bash shell, start the sensor before the PoC and stop it afterward:
+| Case | Expected | Observed alerts | Evidence | Raw log |
+| --- | --- | ---: | --- | --- |
+| PHP 8.4.26 PoC | Alert | 2 | [Case](evidence/affected-positive.json) | [EVE](evidence/raw/affected-positive.jsonl) |
+| PHP 8.4.27 same shape | Alert | 1 | [Case](evidence/patched-control.json) | [EVE](evidence/raw/patched-control.jsonl) |
+| Ordinary upload progress | No alert | 0 | [Case](evidence/benign.json) | [EVE](evidence/raw/benign.jsonl) |
+| Boundary without field | No alert | 0 | [Case](evidence/near-miss.json) | [EVE](evidence/raw/near-miss.jsonl) |
+
+### Reproduce
+
+Start the [PHP 8.4.26 Apache lab](../lab/8.4.26/php-apache/) on `127.0.0.1:18082`, then run this from the repository root. The Suricata image is pinned to digest `sha256:bf4bea5b45d9c10265a3ee6628e2ec8930b9d1fb7caf9d1afb63af413b9cbb26`.
 
 ```bash
 mkdir -p .tools/defense-php
@@ -63,68 +45,50 @@ python -u poc.py --url http://127.0.0.1:18082/ --retries 1
 docker stop php-defense-ids
 ```
 
-Inspect `.tools/defense-php/eve.json` for SID `9000618`. The `.tools/` output
-directory is ignored by Git; the reviewed case logs are retained under
-`evidence/raw/`.
+Look for SID `9000618` in `.tools/defense-php/eve.json`. The PoC's fresh `uid=` and `gid=` output is a separate RCE proof.
 
-The patched control used official `php:8.4.27-apache` digest
-`sha256:c6527b06c772a2c3cae648ce58c23a2a12ed2fed41cdfb0619ea64be008cc601`
-with a local benign `index.php` mounted only to make the same `/` route return
-HTTP 200. The short multipart control shares the rule's request predicates;
-it is not a patched-build exploit reproduction.
+### Limits and triage
 
-## Triage and limits
+This rule matches one PoC boundary and misses changed boundaries or traffic encrypted before the sensor. The positive capture had 1,238 kernel packet drops, so a missing alert cannot establish safety. Use the [playbook](playbooks/php-upload-progress-producer.md) to inspect the full request, PHP build, worker identity, and nearby failures before attributing the event.
 
-See the [analytic](detections/php-upload-progress-producer.yaml) and
-[playbook](playbooks/php-upload-progress-producer.md). Preserve the complete
-HTTP transaction, worker identity, nearby memory-limit or crash events, and
-the installed PHP build before escalating an alert. The rule is specific to
-cleartext HTTP and this PoC producer boundary. It does not cover altered
-boundaries, other upload-progress chains, PHP-FPM without equivalent network
-visibility, or encrypted traffic upstream of the sensor.
+## php-startup-oom-reused-worker
 
-The retained EVE logs include private Docker network addresses only. They were
-recorded from local containers on 24 October 2026. No production traffic or
-third-party system was tested.
+### Claim and scope
 
-## Startup OOM followed by reuse of the same worker
+Claim: attempted_trigger. Status: experimental. The reference evaluator linked a startup OOM to a later request on the same Apache worker and socket in the affected lab.
 
-The second analytic uses PHP error logs and Apache access logs with PID, client
-port, and keepalive request number. Its lab-only [Apache logging
-configuration](rules/apache/php-worker-audit.conf) was loaded before each run.
-The [canonical rule](detections/php-startup-oom-reused-worker.yaml) requires a
-startup OOM (`in Unknown on line 0`), the matching POST completion, and a later
-request on that same worker and socket with a greater keepalive number. The
-[reference evaluator](https://github.com/dimasma0305/irai/blob/5bf859e7cfbc6dcb946d012c8dc61e0a6bd9cfda/.agents/skills/soc-detection-engineering/scripts/php_worker_sequence.py)
-lives in the irai skill, keeping helper scripts out of this repository.
+### Telemetry and rule
 
-| Same-input local control | Reference alerts | Evidence |
-| --- | ---: | --- |
-| PHP 8.4.26: compact multipart producer, then another request on the connection | 1 | [Case](evidence/worker-affected-positive.json) · [full Apache log](evidence/raw/php-affected-worker-20261024.log) |
-| PHP 8.4.27: same producer and continuation | 0 | [Case](evidence/worker-patched-control.json) · [full Apache log](evidence/raw/php-fixed-worker-20261024.log) |
-| PHP 8.4.26: producer OOM, connection closed before a later request | 0 | [Case](evidence/worker-near-miss.json) · [full Apache log](evidence/raw/php-no-consumer-20261024.log) |
-| PHP 8.4.26: ordinary GET | 0 | [Case](evidence/worker-benign.json) · [full Apache log](evidence/raw/php-benign-get-20261024.log) |
+The [analytic](detections/php-startup-oom-reused-worker.yaml) requires an OOM, the POST completion, and a later keepalive request with the same worker PID and client port. The [Apache logging rule](rules/apache/php-worker-audit.conf) supplies those fields. The [reference evaluator](https://github.com/dimasma0305/irai/blob/5bf859e7cfbc6dcb946d012c8dc61e0a6bd9cfda/.agents/skills/soc-detection-engineering/scripts/php_worker_sequence.py) runs on the retained logs.
 
-For these four exact lab cases the attempted-trigger *candidate* has TP=1,
-FP=0, TN=3, FN=0. On the affected run, worker 104 logged startup OOM during
-the POST and served the next request on the same socket (`keepalive=1` then
-`keepalive=2`). The same producer on PHP 8.4.27 did not log OOM. The collector
-may interleave stdout and stderr out of order, so the evaluator uses timestamps
-and the worker/socket keys. These counts are not a field false-positive or
-false-negative estimate.
+### Evidence
 
-To inspect the retained evidence from an irai checkout:
+| Case | Expected | Observed alerts | Evidence | Raw log |
+| --- | --- | ---: | --- | --- |
+| PHP 8.4.26 OOM then reuse | Alert | 1 | [Case](evidence/worker-affected-positive.json) | [Apache](evidence/raw/php-affected-worker-20261024.log) |
+| PHP 8.4.27 same input | No alert | 0 | [Case](evidence/worker-patched-control.json) | [Apache](evidence/raw/php-fixed-worker-20261024.log) |
+| Ordinary GET | No alert | 0 | [Case](evidence/worker-benign.json) | [Apache](evidence/raw/php-benign-get-20261024.log) |
+| OOM without later request | No alert | 0 | [Case](evidence/worker-near-miss.json) | [Apache](evidence/raw/php-no-consumer-20261024.log) |
 
-```shell
+### Reproduce
+
+From an irai checkout, run the evaluator on the retained affected and fixed logs:
+
+```bash
 python <irai-checkout>/.agents/skills/soc-detection-engineering/scripts/php_worker_sequence.py defense/evidence/raw/php-affected-worker-20261024.log
 python <irai-checkout>/.agents/skills/soc-detection-engineering/scripts/php_worker_sequence.py defense/evidence/raw/php-fixed-worker-20261024.log
 ```
 
-The test producer calls `StockReproducer.compact_oom(execution=False)` from the
-published `poc.py` on `KeepAliveEndpoint`, using its 17-byte `S` boundary and
-the same cookie spray, then sends a GET on that connection. The near miss
-closes the connection after the POST. This evaluator does not inspect PHP
-pointer ownership, so its alert cannot establish CVE-2026-109619's stale
-global dereference or a successful exploit. It also misses producers that do
-not use OOM and consumers reached on another connection. The [playbook](playbooks/php-startup-oom-reused-worker.md)
-records these triage limits.
+### Limits and triage
+
+This sequence is a candidate, not proof of a stale pointer or successful exploit. It misses OOM-free producers and consumers on another connection. The logs can interleave, so correlate timestamps, PID, client port, and keepalive number as the [playbook](playbooks/php-startup-oom-reused-worker.md) describes.
+
+## Validation method
+
+The [manifest](validation.json) fixes the claims, sensors, case labels, and evidence paths. Run the independent check against the exact committed revision:
+
+```bash
+python <irai-checkout>/.agents/skills/soc-detection-engineering/scripts/check_detection.py --repo . --revision HEAD --summary
+```
+
+The check recomputes these small lab counts and reconciles selected events with committed raw logs. A static pass does not prove a live alert, full coverage, or a production false-positive rate.
