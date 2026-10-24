@@ -1,0 +1,1 @@
+alert http any any -> any any (msg:"PHP published upload-progress producer shape"; flow:established,to_server; http.method; content:"POST"; http.content_type; content:"boundary=SSSSSSSSSSSSSSSSS"; http.request_body; content:"PHP_SESSION_UPLOAD_PROGRESS"; sid:9000618; rev:4;)

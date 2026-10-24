@@ -25,6 +25,12 @@ The scanner correlates bounded HEAD/GET results, exact runtime identity,
 application fingerprints, session cookies, and visible upload surfaces. It
 does not invoke the PoC, upload a payload, write a remote file, or test RCE/DoS.
 
+### Defender detection
+
+The [experimental Suricata rule and live lab controls](defense/) detect the
+published multipart producer request shape. Its alert means an attempted
+trigger, including on a patched server; the separate PoC output proves impact.
+
 ## Quick Start
 
 ```bash

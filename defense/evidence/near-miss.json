@@ -1,0 +1,62 @@
+{
+  "case_id": "php-near-miss-20261024",
+  "detection_id": "php-upload-progress-producer",
+  "capture": {
+    "mode": "live_lab",
+    "command": "$b = 'S' * 17; $body = \"--$b`r`nContent-Disposition: form-data; name=`\"PHPSESSID`\"`r`n`r`nabc`r`n--$b`r`nContent-Disposition: form-data; name=`\"f`\"`r`n`r`nhello`r`n--$b--`r`n\"; $response = Invoke-WebRequest -Uri 'http://127.0.0.1:18082/' -Method Post -Body ([Text.Encoding]::UTF8.GetBytes($body)) -ContentType \"multipart/form-data; boundary=$b\"; Write-Output \"$($response.StatusCode) $($response.Content)\"",
+    "collector": "Suricata 8.0.7 pcap on target container eth0; EVE JSON",
+    "backend": "Suricata signature sid 9000618 rev 4",
+    "lab": "PHP 8.4.26 Apache stock lab, php2shell-php-apache image",
+    "captured_at": "2026-10-24T10:54:14.059196+00:00",
+    "raw_log": "defense/evidence/raw/near-miss.jsonl",
+    "raw_log_sha256": "83d2af18e6ecbd7fc70ee4a4d71724bb495fe79932a3ca877cdec9764db33c60",
+    "eve_event_count": 6,
+    "eve_alert_count": 0,
+    "kernel_packets": 12,
+    "kernel_drops": 0
+  },
+  "raw_events": [
+    {
+      "event_id": "1911620710124102:0",
+      "eve_sha256": "ef1a4ad84cdf7707f773f4b5039eb47ffad79852c597ad65c77107e461a06560",
+      "eve": {
+        "timestamp": "2026-10-24T10:54:14.059196+0000",
+        "flow_id": 1911620710124102,
+        "in_iface": "eth0",
+        "event_type": "http",
+        "src_ip": "172.17.0.1",
+        "src_port": 49032,
+        "dest_ip": "172.17.0.3",
+        "dest_port": 80,
+        "proto": "TCP",
+        "ip_v": 4,
+        "pkt_src": "wire/pcap",
+        "tx_id": 0,
+        "http": {
+          "hostname": "127.0.0.1",
+          "http_port": 18082,
+          "url": "/",
+          "http_user_agent": "Mozilla/5.0 (Windows NT 10.0; Microsoft Windows 10.0.26200; en-US) PowerShell/7.6.5",
+          "http_content_type": "text/plain",
+          "http_method": "POST",
+          "protocol": "HTTP/1.1",
+          "status": 200,
+          "length": 15
+        }
+      }
+    }
+  ],
+  "normalized_events": [
+    {
+      "event_id": "1911620710124102:0",
+      "flow_id": "1911620710124102",
+      "src_ip": "172.17.0.1",
+      "dest_ip": "172.17.0.3",
+      "protocol": "TCP",
+      "service_port": 80,
+      "http_method": "POST",
+      "url": "/"
+    }
+  ],
+  "alerts": []
+}

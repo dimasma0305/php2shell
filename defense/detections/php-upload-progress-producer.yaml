@@ -1,0 +1,22 @@
+id: php-upload-progress-producer
+owner: dimasma0305
+status: experimental
+claim: attempted_trigger
+finding: CVE-2026-109618 / CVE-2026-109619 research lab
+sensor:
+  product: Suricata 8.0.7
+  location: ingress
+  source: EVE alert and HTTP events on the PHP Apache container eth0
+  transport: plaintext HTTP after TLS termination
+  required_fields: [flow_id, src_ip, dest_ip, http.http_method, http.url]
+selection:
+  method: POST
+  content_type: multipart/form-data with boundary S repeated 17 times
+  request_body: PHP_SESSION_UPLOAD_PROGRESS
+  signature_id: 9000618
+  rule: ../rules/suricata/php-upload-progress-producer.rules
+severity: medium
+reason: A published exploit producer shape was observed; impact needs separate proof.
+known_overlap: Legitimate upload-progress forms can contain the named field; the fixed boundary narrows this lab rule.
+known_misses: Changed boundary, encrypted traffic before the sensor, packet loss, alternative exploit chains.
+deployment: Alert-only test; do not block based on this experimental rule.

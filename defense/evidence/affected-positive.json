@@ -1,0 +1,219 @@
+{
+  "case_id": "php-affected-positive-20261024",
+  "detection_id": "php-upload-progress-producer",
+  "capture": {
+    "mode": "live_lab",
+    "command": "python -u poc.py --url http://127.0.0.1:18082/ --retries 1",
+    "collector": "Suricata 8.0.7 pcap on target container eth0; EVE JSON",
+    "backend": "Suricata signature sid 9000618 rev 4",
+    "lab": "PHP 8.4.26 Apache stock lab, php2shell-php-apache image",
+    "captured_at": "2026-10-24T10:50:05.838659+00:00",
+    "raw_log": "defense/evidence/raw/affected-positive.jsonl",
+    "raw_log_sha256": "47039b0da50e76fe215aaf71c1c36890594b5d8f4daf18f7d0d0b208731ca887",
+    "eve_event_count": 60,
+    "eve_alert_count": 2,
+    "kernel_packets": 65901,
+    "kernel_drops": 1238,
+    "operator_result": "PROOF: uid=33(www-data) gid=33(www-data) groups=33(www-data)"
+  },
+  "raw_events": [
+    {
+      "event_id": "1411033079224228:0",
+      "eve_sha256": "b3478af3830c557e44aab8c15d83d378566cc8b2d59a081a38e7fbd675da567c",
+      "eve": {
+        "timestamp": "2026-10-24T10:50:05.838659+0000",
+        "flow_id": 1411033079224228,
+        "in_iface": "eth0",
+        "event_type": "alert",
+        "src_ip": "172.17.0.1",
+        "src_port": 45702,
+        "dest_ip": "172.17.0.3",
+        "dest_port": 80,
+        "proto": "TCP",
+        "ip_v": 4,
+        "pkt_src": "wire/pcap",
+        "tx_id": 0,
+        "alert": {
+          "action": "allowed",
+          "gid": 1,
+          "signature_id": 9000618,
+          "rev": 4,
+          "signature": "PHP published upload-progress producer shape",
+          "category": "",
+          "severity": 3
+        },
+        "ts_progress": "request_body",
+        "tc_progress": "response_started",
+        "http": {
+          "hostname": "127.0.0.1",
+          "http_port": 18082,
+          "url": "/",
+          "http_method": "POST",
+          "protocol": "HTTP/1.1",
+          "length": 0
+        },
+        "app_proto": "http",
+        "direction": "to_server",
+        "flow": {
+          "pkts_toserver": 1226,
+          "pkts_toclient": 919,
+          "bytes_toserver": 169577,
+          "bytes_toclient": 60662,
+          "start": "2026-10-24T10:50:05.721747+0000",
+          "src_ip": "172.17.0.1",
+          "dest_ip": "172.17.0.3",
+          "src_port": 45702,
+          "dest_port": 80
+        }
+      }
+    },
+    {
+      "event_id": "1411033079224228:0",
+      "eve_sha256": "a2ecff3598006e3a6a1f9b147298faa84eaf217797103f7ab4007e381a26b0c9",
+      "eve": {
+        "timestamp": "2026-10-24T10:50:05.842152+0000",
+        "flow_id": 1411033079224228,
+        "in_iface": "eth0",
+        "event_type": "http",
+        "src_ip": "172.17.0.1",
+        "src_port": 45702,
+        "dest_ip": "172.17.0.3",
+        "dest_port": 80,
+        "proto": "TCP",
+        "ip_v": 4,
+        "pkt_src": "wire/pcap",
+        "tx_id": 0,
+        "http": {
+          "hostname": "127.0.0.1",
+          "http_port": 18082,
+          "url": "/",
+          "http_method": "POST",
+          "protocol": "HTTP/1.1",
+          "length": 0
+        }
+      }
+    },
+    {
+      "event_id": "152618019142945:0",
+      "eve_sha256": "e20c5f2dc419746e80733b520d0adf65555bb86e9001765b7a07457b2e015dff",
+      "eve": {
+        "timestamp": "2026-10-24T10:50:08.311416+0000",
+        "flow_id": 152618019142945,
+        "in_iface": "eth0",
+        "event_type": "alert",
+        "src_ip": "172.17.0.1",
+        "src_port": 53596,
+        "dest_ip": "172.17.0.3",
+        "dest_port": 80,
+        "proto": "TCP",
+        "ip_v": 4,
+        "pkt_src": "wire/pcap",
+        "tx_id": 0,
+        "alert": {
+          "action": "allowed",
+          "gid": 1,
+          "signature_id": 9000618,
+          "rev": 4,
+          "signature": "PHP published upload-progress producer shape",
+          "category": "",
+          "severity": 3
+        },
+        "ts_progress": "request_body",
+        "tc_progress": "response_started",
+        "http": {
+          "hostname": "127.0.0.1",
+          "http_port": 18082,
+          "url": "/",
+          "http_method": "POST",
+          "protocol": "HTTP/1.1",
+          "length": 0
+        },
+        "app_proto": "http",
+        "direction": "to_server",
+        "flow": {
+          "pkts_toserver": 22,
+          "pkts_toclient": 18,
+          "bytes_toserver": 59988,
+          "bytes_toclient": 1196,
+          "start": "2026-10-24T10:50:08.297678+0000",
+          "src_ip": "172.17.0.1",
+          "dest_ip": "172.17.0.3",
+          "src_port": 53596,
+          "dest_port": 80
+        }
+      }
+    },
+    {
+      "event_id": "152618019142945:0",
+      "eve_sha256": "22f0296a977b9c94a698c6cead2b98af1fa4f053106d2f24307e8b6c718523ea",
+      "eve": {
+        "timestamp": "2026-10-24T10:50:08.312906+0000",
+        "flow_id": 152618019142945,
+        "in_iface": "eth0",
+        "event_type": "http",
+        "src_ip": "172.17.0.1",
+        "src_port": 53596,
+        "dest_ip": "172.17.0.3",
+        "dest_port": 80,
+        "proto": "TCP",
+        "ip_v": 4,
+        "pkt_src": "wire/pcap",
+        "tx_id": 0,
+        "http": {
+          "hostname": "127.0.0.1",
+          "http_port": 18082,
+          "url": "/",
+          "http_method": "POST",
+          "protocol": "HTTP/1.1",
+          "length": 0
+        }
+      }
+    }
+  ],
+  "normalized_events": [
+    {
+      "event_id": "1411033079224228:0",
+      "flow_id": "1411033079224228",
+      "src_ip": "172.17.0.1",
+      "dest_ip": "172.17.0.3",
+      "protocol": "TCP",
+      "service_port": 80,
+      "http_method": "POST",
+      "url": "/"
+    },
+    {
+      "event_id": "152618019142945:0",
+      "flow_id": "152618019142945",
+      "src_ip": "172.17.0.1",
+      "dest_ip": "172.17.0.3",
+      "protocol": "TCP",
+      "service_port": 80,
+      "http_method": "POST",
+      "url": "/"
+    }
+  ],
+  "alerts": [
+    {
+      "case_id": "php-affected-positive-20261024",
+      "detection_id": "php-upload-progress-producer",
+      "source_event_ids": [
+        "1411033079224228:0"
+      ],
+      "signature_id": 9000618,
+      "revision": 4,
+      "timestamp": "2026-10-24T10:50:05.838659+0000",
+      "eve_sha256": "b3478af3830c557e44aab8c15d83d378566cc8b2d59a081a38e7fbd675da567c"
+    },
+    {
+      "case_id": "php-affected-positive-20261024",
+      "detection_id": "php-upload-progress-producer",
+      "source_event_ids": [
+        "152618019142945:0"
+      ],
+      "signature_id": 9000618,
+      "revision": 4,
+      "timestamp": "2026-10-24T10:50:08.311416+0000",
+      "eve_sha256": "e20c5f2dc419746e80733b520d0adf65555bb86e9001765b7a07457b2e015dff"
+    }
+  ]
+}
