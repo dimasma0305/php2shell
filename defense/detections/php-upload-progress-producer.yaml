@@ -1,4 +1,5 @@
 id: php-upload-progress-producer
+artifact_type: sensor_rule
 owner: dimasma0305
 status: experimental
 claim: attempted_trigger
