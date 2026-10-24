@@ -1,5 +1,0 @@
-2026-10-24T11:53:12.235879147Z 172.17.0.1 port=45824 [24/Oct/2026:11:53:12 +0000] "GET / HTTP/1.1" 200 15 worker=17 keepalive=0
-2026-10-24T11:53:07.201919385Z AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.17.0.6. Set the 'ServerName' directive globally to suppress this message
-2026-10-24T11:53:07.244724829Z AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.17.0.6. Set the 'ServerName' directive globally to suppress this message
-2026-10-24T11:53:07.260277759Z [Sat Oct 24 11:53:07.260092 2026] [mpm_prefork:notice] [pid 1:tid 1] AH00163: Apache/2.4.69 (Debian) PHP/8.4.26 configured -- resuming normal operations
-2026-10-24T11:53:07.260311905Z [Sat Oct 24 11:53:07.260158 2026] [core:notice] [pid 1:tid 1] AH00094: Command line: 'apache2 -D FOREGROUND'
