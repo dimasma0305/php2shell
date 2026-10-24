@@ -1,5 +1,5 @@
 {
-  "schema": "irai-soc-detection-v1",
+  "schema": "soc-detection-v1",
   "detections": [
     {
       "id": "php-upload-progress-producer",
@@ -10,39 +10,51 @@
       "sensor": {
         "location": "ingress",
         "source": "Suricata 8.0.7 EVE on Apache container eth0",
-        "required_fields": ["event_id", "flow_id", "http_method", "url", "service_port"]
+        "required_fields": [
+          "event_id",
+          "flow_id",
+          "http_method",
+          "url",
+          "service_port"
+        ]
       },
       "analytic": "defense/detections/php-upload-progress-producer.yaml",
       "rule": "defense/rules/suricata/php-upload-progress-producer.rules",
       "playbook": "defense/playbooks/php-upload-progress-producer.md",
-      "accepted_false_positives": ["php-benign-fixed-boundary-20261025"],
+      "accepted_false_positives": [
+        "php-benign-fixed-boundary-20261025"
+      ],
       "cases": [
-        {"id": "php-affected-positive-20261024", "role": "affected_positive", "expected_alert": true, "evidence": "defense/test/php-upload-progress-producer/evidence/affected-positive.json"},
-        {"id": "php-patched-control-20261024", "role": "patched_control", "expected_alert": true, "evidence": "defense/test/php-upload-progress-producer/evidence/patched-control.json"},
-        {"id": "php-benign-20261024", "role": "benign", "expected_alert": false, "evidence": "defense/test/php-upload-progress-producer/evidence/benign.json"},
-        {"id": "php-near-miss-20261024", "role": "near_miss", "expected_alert": false, "evidence": "defense/test/php-upload-progress-producer/evidence/near-miss.json"},
-        {"id": "php-benign-fixed-boundary-20261025", "role": "benign", "expected_alert": false, "evidence": "defense/test/php-upload-progress-producer/evidence/benign-fixed-boundary.json"}
-      ]
-    },
-    {
-      "id": "php-startup-oom-reused-worker",
-      "owner": "dimasma0305",
-      "status": "experimental",
-      "claim": "attempted_trigger",
-      "artifact_type": "lab_reference",
-      "sensor": {
-        "location": "runtime",
-        "source": "Apache access and PHP error logs with worker PID, client port, and keepalive counter",
-        "required_fields": ["event_id", "worker_pid", "client", "kind", "timestamp"]
-      },
-      "analytic": "defense/test/php-startup-oom-reused-worker/analytic.yaml",
-      "test_config": "defense/test/php-startup-oom-reused-worker/collector.conf",
-      "review": "defense/test/php-startup-oom-reused-worker/review.md",
-      "cases": [
-        {"id": "php-worker-affected-positive-20261024", "role": "affected_positive", "expected_alert": true, "evidence": "defense/test/php-startup-oom-reused-worker/evidence/worker-affected-positive.json"},
-        {"id": "php-worker-patched-control-20261024", "role": "patched_control", "expected_alert": false, "evidence": "defense/test/php-startup-oom-reused-worker/evidence/worker-patched-control.json"},
-        {"id": "php-worker-benign-20261024", "role": "benign", "expected_alert": false, "evidence": "defense/test/php-startup-oom-reused-worker/evidence/worker-benign.json"},
-        {"id": "php-worker-near-miss-20261024", "role": "near_miss", "expected_alert": false, "evidence": "defense/test/php-startup-oom-reused-worker/evidence/worker-near-miss.json"}
+        {
+          "id": "php-affected-positive-20261024",
+          "role": "affected_positive",
+          "expected_alert": true,
+          "evidence": "defense/test/php-upload-progress-producer/evidence/affected-positive.json"
+        },
+        {
+          "id": "php-patched-control-20261024",
+          "role": "patched_control",
+          "expected_alert": true,
+          "evidence": "defense/test/php-upload-progress-producer/evidence/patched-control.json"
+        },
+        {
+          "id": "php-benign-20261024",
+          "role": "benign",
+          "expected_alert": false,
+          "evidence": "defense/test/php-upload-progress-producer/evidence/benign.json"
+        },
+        {
+          "id": "php-near-miss-20261024",
+          "role": "near_miss",
+          "expected_alert": false,
+          "evidence": "defense/test/php-upload-progress-producer/evidence/near-miss.json"
+        },
+        {
+          "id": "php-benign-fixed-boundary-20261025",
+          "role": "benign",
+          "expected_alert": false,
+          "evidence": "defense/test/php-upload-progress-producer/evidence/benign-fixed-boundary.json"
+        }
       ]
     }
   ]
