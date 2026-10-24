@@ -1,6 +1,6 @@
 # Defender signals for PHP upload progress
 
-No production-ready detection is shipped. The Suricata rule is a lab-tested candidate for evaluation on your sensor. The worker-sequence item is a [lab-only test](test/php-startup-oom-reused-worker/), not a SOC rule. Neither proves memory corruption or RCE.
+No production-ready detection is shipped. The Suricata rule is a lab-tested candidate for evaluation on your sensor. The worker-sequence item is a [lab-only test](test/php-startup-oom-reused-worker/), not a SOC rule. Neither proves memory corruption or RCE. Rules and playbooks are the SOC-facing files; [test](test/) holds the validation manifest, case receipts, and raw logs.
 
 ## Detection index
 
@@ -23,11 +23,11 @@ Suricata 8.0.7 reads plaintext HTTP on the Apache container's `eth0`. The [analy
 
 | Case | Expected | Observed alerts | Capture health | Evidence | Raw log |
 | --- | --- | ---: | --- | --- | --- |
-| PHP 8.4.26 PoC | Alert | 2 | loss_reported | [Case](evidence/affected-positive.json) | [EVE](evidence/raw/affected-positive.jsonl) |
-| PHP 8.4.27 same shape | Alert | 1 | no_loss_reported | [Case](evidence/patched-control.json) | [EVE](evidence/raw/patched-control.jsonl) |
-| Ordinary upload progress | No alert | 0 | no_loss_reported | [Case](evidence/benign.json) | [EVE](evidence/raw/benign.jsonl) |
-| Boundary without field | No alert | 0 | no_loss_reported | [Case](evidence/near-miss.json) | [EVE](evidence/raw/near-miss.jsonl) |
-| Benign upload, same boundary | No alert | 1 | no_loss_reported | [Case](evidence/benign-fixed-boundary.json) | [EVE](evidence/raw/benign-fixed-boundary.jsonl) |
+| PHP 8.4.26 PoC | Alert | 2 | loss_reported | [Case](test/php-upload-progress-producer/evidence/affected-positive.json) | [EVE](test/php-upload-progress-producer/evidence/raw/affected-positive.jsonl) |
+| PHP 8.4.27 same shape | Alert | 1 | no_loss_reported | [Case](test/php-upload-progress-producer/evidence/patched-control.json) | [EVE](test/php-upload-progress-producer/evidence/raw/patched-control.jsonl) |
+| Ordinary upload progress | No alert | 0 | no_loss_reported | [Case](test/php-upload-progress-producer/evidence/benign.json) | [EVE](test/php-upload-progress-producer/evidence/raw/benign.jsonl) |
+| Boundary without field | No alert | 0 | no_loss_reported | [Case](test/php-upload-progress-producer/evidence/near-miss.json) | [EVE](test/php-upload-progress-producer/evidence/raw/near-miss.jsonl) |
+| Benign upload, same boundary | No alert | 1 | no_loss_reported | [Case](test/php-upload-progress-producer/evidence/benign-fixed-boundary.json) | [EVE](test/php-upload-progress-producer/evidence/raw/benign-fixed-boundary.jsonl) |
 
 ### Reproduce
 
@@ -66,18 +66,18 @@ The [test description](test/php-startup-oom-reused-worker/analytic.yaml) require
 
 | Case | Expected | Observed alerts | Capture health | Evidence | Raw log |
 | --- | --- | ---: | --- | --- | --- |
-| PHP 8.4.26 OOM then reuse | Alert | 1 | N/A | [Case](evidence/worker-affected-positive.json) | [Apache](evidence/raw/php-affected-worker-20261024.log) |
-| PHP 8.4.27 same input | No alert | 0 | N/A | [Case](evidence/worker-patched-control.json) | [Apache](evidence/raw/php-fixed-worker-20261024.log) |
-| Ordinary GET | No alert | 0 | N/A | [Case](evidence/worker-benign.json) | [Apache](evidence/raw/php-benign-get-20261024.log) |
-| OOM without later request | No alert | 0 | N/A | [Case](evidence/worker-near-miss.json) | [Apache](evidence/raw/php-no-consumer-20261024.log) |
+| PHP 8.4.26 OOM then reuse | Alert | 1 | N/A | [Case](test/php-startup-oom-reused-worker/evidence/worker-affected-positive.json) | [Apache](test/php-startup-oom-reused-worker/evidence/raw/php-affected-worker-20261024.log) |
+| PHP 8.4.27 same input | No alert | 0 | N/A | [Case](test/php-startup-oom-reused-worker/evidence/worker-patched-control.json) | [Apache](test/php-startup-oom-reused-worker/evidence/raw/php-fixed-worker-20261024.log) |
+| Ordinary GET | No alert | 0 | N/A | [Case](test/php-startup-oom-reused-worker/evidence/worker-benign.json) | [Apache](test/php-startup-oom-reused-worker/evidence/raw/php-benign-get-20261024.log) |
+| OOM without later request | No alert | 0 | N/A | [Case](test/php-startup-oom-reused-worker/evidence/worker-near-miss.json) | [Apache](test/php-startup-oom-reused-worker/evidence/raw/php-no-consumer-20261024.log) |
 
 ### Reproduce
 
 From an irai checkout, run the evaluator on the retained affected and fixed logs:
 
 ```bash
-python <irai-checkout>/.agents/skills/soc-detection-engineering/scripts/php_worker_sequence.py defense/evidence/raw/php-affected-worker-20261024.log
-python <irai-checkout>/.agents/skills/soc-detection-engineering/scripts/php_worker_sequence.py defense/evidence/raw/php-fixed-worker-20261024.log
+python <irai-checkout>/.agents/skills/soc-detection-engineering/scripts/php_worker_sequence.py defense/test/php-startup-oom-reused-worker/evidence/raw/php-affected-worker-20261024.log
+python <irai-checkout>/.agents/skills/soc-detection-engineering/scripts/php_worker_sequence.py defense/test/php-startup-oom-reused-worker/evidence/raw/php-fixed-worker-20261024.log
 ```
 
 ### Limits and next step
@@ -86,7 +86,7 @@ This lab result is not proof of a stale pointer or successful exploit. It misses
 
 ## Validation method
 
-The [manifest](validation.json) fixes the claims, sensors, case labels, and evidence paths. Run the independent check against the exact committed revision:
+The [manifest](test/validation.json) fixes the claims, sensors, case labels, and evidence paths. Run the independent check against the exact committed revision:
 
 ```bash
 python <irai-checkout>/.agents/skills/soc-detection-engineering/scripts/check_detection.py --repo . --revision HEAD --summary

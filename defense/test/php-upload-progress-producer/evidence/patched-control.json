@@ -1,35 +1,34 @@
 {
-  "case_id": "php-benign-fixed-boundary-20261025",
+  "case_id": "php-patched-control-20261024",
   "detection_id": "php-upload-progress-producer",
   "capture": {
     "mode": "live_lab",
-    "command": "PowerShell Invoke-WebRequest -Uri 'http://127.0.0.1:18082/?case=benign-fixed-boundary' -Method Post -Body $body -ContentType 'multipart/form-data; boundary=SSSSSSSSSSSSSSSSS'; body contains ordinary PHPSESSID, ordinary PHP_SESSION_UPLOAD_PROGRESS, and note.txt='hello'",
+    "command": "$b = 'S' * 17; $body = \"--$b`r`nContent-Disposition: form-data; name=`\"PHPSESSID`\"`r`n`r`nabc`r`n--$b`r`nContent-Disposition: form-data; name=`\"PHP_SESSION_UPLOAD_PROGRESS`\"`r`n`r`npwn`r`n--$b--`r`n\"; $response = Invoke-WebRequest -Uri 'http://127.0.0.1:18082/' -Method Post -Body ([Text.Encoding]::UTF8.GetBytes($body)) -ContentType \"multipart/form-data; boundary=$b\"; Write-Output \"$($response.StatusCode) $($response.Content)\"",
     "collector": "Suricata 8.0.7 pcap on target container eth0; EVE JSON",
     "backend": "Suricata signature sid 9000618 rev 4",
-    "lab": "PHP 8.4.26 Apache stock lab, php2shell-php-apache image",
-    "captured_at": "2026-10-24T22:18:38.089359+00:00",
-    "raw_log": "defense/evidence/raw/benign-fixed-boundary.jsonl",
-    "raw_log_sha256": "df9cde0dcb44d1c1122048e2a8fa99ade89c2bb4c30dfc6567a952b4843fde8c",
-    "eve_event_count": 10,
+    "lab": "PHP 8.4.27 Apache official image sha256:c6527b06c772a2c3cae648ce58c23a2a12ed2fed41cdfb0619ea64be008cc601",
+    "captured_at": "2026-10-24T10:55:09.557051+00:00",
+    "raw_log": "defense/test/php-upload-progress-producer/evidence/raw/patched-control.jsonl",
+    "raw_log_sha256": "43b5aed8789216df46541814d6448bfdebe1d47a9f31deff9e83e4c9e5484bec",
+    "eve_event_count": 26,
     "eve_alert_count": 1,
-    "kernel_packets": 10,
+    "kernel_packets": 14,
     "kernel_drops": 0,
     "reassembly_gap": 0,
-    "capture_health": "no_loss_reported",
-    "operator_result": "HTTP 200; ordinary upload only; no exploit payload or command"
+    "capture_health": "no_loss_reported"
   },
   "raw_events": [
     {
-      "event_id": "1755666802593713:0",
-      "eve_sha256": "dd7fdb696c036ea3d9d3bc9e252f1c28bd1c6bb3ab7bc5aa3b599aa83bc33d44",
+      "event_id": "1481060583824238:0",
+      "eve_sha256": "304b50b8579f9591d676fd3753fac6e248109108b2e2f1d0b45371cbe1ee1ce5",
       "eve": {
-        "timestamp": "2026-10-24T22:18:38.089359+0000",
-        "flow_id": 1755666802593713,
+        "timestamp": "2026-10-24T10:55:09.557051+0000",
+        "flow_id": 1481060583824238,
         "in_iface": "eth0",
         "event_type": "alert",
         "src_ip": "172.17.0.1",
-        "src_port": 57470,
-        "dest_ip": "172.17.0.2",
+        "src_port": 60564,
+        "dest_ip": "172.17.0.3",
         "dest_port": 80,
         "proto": "TCP",
         "ip_v": 4,
@@ -49,40 +48,40 @@
         "http": {
           "hostname": "127.0.0.1",
           "http_port": 18082,
-          "url": "/?case=benign-fixed-boundary",
+          "url": "/",
           "http_user_agent": "Mozilla/5.0 (Windows NT 10.0; Microsoft Windows 10.0.26200; en-US) PowerShell/7.6.5",
           "http_content_type": "text/plain",
           "http_method": "POST",
           "protocol": "HTTP/1.1",
           "status": 200,
-          "length": 15
+          "length": 10
         },
         "app_proto": "http",
         "direction": "to_server",
         "flow": {
           "pkts_toserver": 4,
           "pkts_toclient": 3,
-          "bytes_toserver": 890,
-          "bytes_toclient": 395,
-          "start": "2026-10-24T22:18:38.081093+0000",
+          "bytes_toserver": 728,
+          "bytes_toclient": 454,
+          "start": "2026-10-24T10:55:09.541444+0000",
           "src_ip": "172.17.0.1",
-          "dest_ip": "172.17.0.2",
-          "src_port": 57470,
+          "dest_ip": "172.17.0.3",
+          "src_port": 60564,
           "dest_port": 80
         }
       }
     },
     {
-      "event_id": "1755666802593713:0",
-      "eve_sha256": "0467cf15296655e1dc73141f0285faab112a757c3006e9d0841d6452b339bfae",
+      "event_id": "1481060583824238:0",
+      "eve_sha256": "0fc73d2858e2db986091176159f4b58fb4d1002ea7bfd532b0eba00998f3b078",
       "eve": {
-        "timestamp": "2026-10-24T22:18:38.089359+0000",
-        "flow_id": 1755666802593713,
+        "timestamp": "2026-10-24T10:55:09.557051+0000",
+        "flow_id": 1481060583824238,
         "in_iface": "eth0",
         "event_type": "http",
         "src_ip": "172.17.0.1",
-        "src_port": 57470,
-        "dest_ip": "172.17.0.2",
+        "src_port": 60564,
+        "dest_ip": "172.17.0.3",
         "dest_port": 80,
         "proto": "TCP",
         "ip_v": 4,
@@ -91,49 +90,40 @@
         "http": {
           "hostname": "127.0.0.1",
           "http_port": 18082,
-          "url": "/?case=benign-fixed-boundary",
+          "url": "/",
           "http_user_agent": "Mozilla/5.0 (Windows NT 10.0; Microsoft Windows 10.0.26200; en-US) PowerShell/7.6.5",
           "http_content_type": "text/plain",
           "http_method": "POST",
           "protocol": "HTTP/1.1",
           "status": 200,
-          "length": 15
+          "length": 10
         }
       }
     }
   ],
   "normalized_events": [
     {
-      "event_id": "1755666802593713:0",
-      "flow_id": "1755666802593713",
+      "event_id": "1481060583824238:0",
+      "flow_id": "1481060583824238",
       "src_ip": "172.17.0.1",
-      "dest_ip": "172.17.0.2",
+      "dest_ip": "172.17.0.3",
       "protocol": "TCP",
       "service_port": 80,
       "http_method": "POST",
-      "url": "/?case=benign-fixed-boundary"
-    },
-    {
-      "event_id": "1755666802593713:0",
-      "flow_id": "1755666802593713",
-      "src_ip": "172.17.0.1",
-      "dest_ip": "172.17.0.2",
-      "protocol": "TCP",
-      "service_port": 80,
-      "http_method": "POST",
-      "url": "/?case=benign-fixed-boundary"
+      "url": "/"
     }
   ],
   "alerts": [
     {
-      "case_id": "php-benign-fixed-boundary-20261025",
+      "case_id": "php-patched-control-20261024",
       "detection_id": "php-upload-progress-producer",
       "source_event_ids": [
-        "1755666802593713:0"
+        "1481060583824238:0"
       ],
-      "eve_sha256": "dd7fdb696c036ea3d9d3bc9e252f1c28bd1c6bb3ab7bc5aa3b599aa83bc33d44",
       "signature_id": 9000618,
-      "revision": 4
+      "revision": 4,
+      "timestamp": "2026-10-24T10:55:09.557051+0000",
+      "eve_sha256": "304b50b8579f9591d676fd3753fac6e248109108b2e2f1d0b45371cbe1ee1ce5"
     }
   ]
 }
