@@ -253,7 +253,8 @@ python3 -u poc.py --url http://127.0.0.1:18173/ --check-profile
 ## Scanner Limitations
 
 - The scanner can assess only an exact PHP version naturally disclosed in an
-  HTTP response. A hidden version remains unknown.
+  trusted identity header or structured diagnostic response. A hidden version
+  remains unknown; ordinary body text that mentions a version is ignored.
 - A reported affected version is version triage, not proof that the vulnerable
   request path, SAPI, heap layout, or RCE prerequisites are present.
 - A reported patched version covers these two CVEs only; it is not a general

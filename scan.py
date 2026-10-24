@@ -58,12 +58,23 @@ def load_assets(path: Path) -> list[str]:
 
 
 def version_from(headers: Iterable[tuple[str, str]], body: bytes) -> tuple[tuple[int, int, int] | None, str | None]:
-    header_text = "\n".join(f"{key}: {value}" for key, value in headers)
+    trusted_headers = {
+        key.lower(): value
+        for key, value in headers
+        if key.lower() in {"server", "x-powered-by", "x-php-version"}
+    }
+    header_text = "\n".join(f"{key}: {value}" for key, value in trusted_headers.items())
     match = PHP_RE.search(header_text)
     if match:
         return tuple(map(int, match.groups())), "header"
-    match = PHP_RE.search(body.decode("latin-1", "replace"))
-    return (tuple(map(int, match.groups())), "body") if match else (None, None)
+    body_text = body.decode("latin-1", "replace")
+    lower_body = body_text.lower()
+    if "phpinfo()" in lower_body and "php credits" in lower_body:
+        match = re.search(r"PHP Version\s*(?:</?[^>]+>\s*)*(\d+)\.(\d+)\.(\d+)", body_text, re.I)
+        if match:
+            return tuple(map(int, match.groups())), "body:phpinfo"
+    match = re.search(r'["\']php_version["\']\s*:\s*["\'](\d+)\.(\d+)\.(\d+)["\']', body_text, re.I)
+    return (tuple(map(int, match.groups())), "body:diagnostic-json") if match else (None, None)
 
 
 def collect_signals(

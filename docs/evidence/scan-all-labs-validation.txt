@@ -1,7 +1,7 @@
 Passive all-lab scanner validation
 ==================================
 
-Recorded: 2026-10-24T16:38:33+08:00
+Recorded: 2026-10-24T16:57:57+08:00
 Base revision: 6e1c19a6ff750b5e49be29455df0db63c80a70aa
 Assets SHA-256: 6ad9eb3ff8d85e11b87d40605a6cc8f3250c106a3827d7a50a1ac3236b074937
 Setup: docker compose -f compose.scan.yaml up -d --build
