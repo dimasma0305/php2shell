@@ -1,0 +1,7 @@
+# Included loopback labs. Start every lab before running the scan demo.
+http://127.0.0.1:18173/
+http://127.0.0.1:18081/
+http://127.0.0.1:18083/
+http://127.0.0.1:18086/
+http://127.0.0.1:18082/
+http://127.0.0.1:18087/
