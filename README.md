@@ -21,8 +21,9 @@ executes `id` and retrieves fresh output containing both `uid=` and `gid=`.
 
 ![Live passive scan of every included lab](docs/demo/scan-all-labs.gif)
 
-The scanner performs bounded, ordinary HTTP requests only. It does not invoke
-the PoC, upload a payload, write a remote file, or test RCE/DoS.
+The scanner correlates bounded HEAD/GET results, exact runtime identity,
+application fingerprints, session cookies, and visible upload surfaces. It
+does not invoke the PoC, upload a payload, write a remote file, or test RCE/DoS.
 
 ## Quick Start
 
@@ -63,9 +64,10 @@ python scan.py --assets assets.txt
 docker compose -f compose.scan.yaml down -v
 ```
 
-The output distinguishes an observed affected or patched PHP version from a
-hidden/unknown version. It never treats reachability as proof of vulnerability
-or safety. [VHS tape](docs/demo/scan-all-labs.tape) ·
+`STATUS` is based only on an exact disclosed PHP version. `EXPOSURE` and
+`SIGNALS` separately report PHP/application fingerprints and visible session or
+upload prerequisites; they never upgrade an asset to vulnerable. Use
+`--format jsonl` for the complete, untruncated signal list. [VHS tape](docs/demo/scan-all-labs.tape) ·
 [MP4](docs/demo/scan-all-labs.mp4) ·
 [Raw terminal output](docs/demo/scan-all-labs.ascii) ·
 [Validation record](docs/evidence/scan-all-labs-validation.txt)
@@ -256,6 +258,8 @@ python3 -u poc.py --url http://127.0.0.1:18173/ --check-profile
   request path, SAPI, heap layout, or RCE prerequisites are present.
 - A reported patched version covers these two CVEs only; it is not a general
   security assessment of the application.
+- Missing session/upload signals mean only that the requested page did not
+  expose them; absence is not proof that another route lacks the prerequisite.
 - Redirects are not followed, response bodies are capped at 64 KiB, and TLS
   certificate verification stays enabled.
 

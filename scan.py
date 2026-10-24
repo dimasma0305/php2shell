@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Passive multi-asset version triage for CVE-2026-109618/109619.
+"""Passive multi-signal asset triage for CVE-2026-109618/109619.
 
 This scanner sends only ordinary bounded HTTP HEAD/GET requests. It never
 imports the exploit, uploads data, writes a remote file, or tests RCE/DoS.
@@ -32,7 +32,9 @@ FIXED = {(8, 2): (8, 2, 35), (8, 3): (8, 3, 36), (8, 4): (8, 4, 27), (8, 5): (8,
 class Result:
     asset: str
     status: str
+    exposure: str
     observed: str
+    signals: tuple[str, ...]
     detail: str
     elapsed_ms: int
 
@@ -55,16 +57,63 @@ def load_assets(path: Path) -> list[str]:
     return assets
 
 
-def version_from(headers: Iterable[tuple[str, str]], body: bytes) -> tuple[int, int, int] | None:
-    text = "\n".join(f"{key}: {value}" for key, value in headers)
-    text += "\n" + body.decode("latin-1", "replace")
-    match = PHP_RE.search(text)
-    return tuple(map(int, match.groups())) if match else None
+def version_from(headers: Iterable[tuple[str, str]], body: bytes) -> tuple[tuple[int, int, int] | None, str | None]:
+    header_text = "\n".join(f"{key}: {value}" for key, value in headers)
+    match = PHP_RE.search(header_text)
+    if match:
+        return tuple(map(int, match.groups())), "header"
+    match = PHP_RE.search(body.decode("latin-1", "replace"))
+    return (tuple(map(int, match.groups())), "body") if match else (None, None)
 
 
-def classify(version: tuple[int, int, int] | None, headers: list[tuple[str, str]], body: bytes) -> tuple[str, str, str]:
-    evidence = "\n".join(f"{k}: {v}" for k, v in headers).lower()
-    sample = body[:4096].decode("latin-1", "replace").lower()
+def collect_signals(
+    headers: list[tuple[str, str]], body: bytes, version: tuple[int, int, int] | None, version_source: str | None
+) -> tuple[tuple[str, ...], str]:
+    header_text = "\n".join(f"{key}: {value}" for key, value in headers).lower()
+    sample = body[:MAX_BODY].decode("latin-1", "replace").lower()
+    combined = header_text + "\n" + sample
+    signals: list[str] = ["transport:http"]
+    if version:
+        signals.append(f"runtime:php/{'.'.join(map(str, version))}@{version_source}")
+    if "x-powered-by: php" in header_text:
+        signals.append("header:x-powered-by-php")
+    if "phpsessid" in header_text:
+        signals.append("session:phpsessid-cookie")
+    application_tokens = {
+        "wordpress": ("wordpress", "wp-content", "wp-includes"),
+        "mediawiki": ("mediawiki",),
+        "dokuwiki": ("dokuwiki",),
+        "joomla": ("joomla",),
+        "codeigniter": ("codeigniter",),
+        "laravel": ("laravel_session", "laravel"),
+    }
+    for name, tokens in application_tokens.items():
+        if any(token in combined for token in tokens):
+            signals.append(f"app:{name}")
+    multipart = "multipart/form-data" in sample
+    file_input = bool(re.search(r"<input\b[^>]*\btype\s*=\s*['\"]?file\b", sample, re.I))
+    if multipart:
+        signals.append("surface:multipart-form")
+    if file_input:
+        signals.append("surface:file-input")
+    has_session = "session:phpsessid-cookie" in signals
+    has_upload = multipart or file_input
+    if has_session and has_upload:
+        exposure = "SESSION_AND_UPLOAD_SIGNALS"
+    elif has_session:
+        exposure = "SESSION_SIGNAL_ONLY"
+    elif has_upload:
+        exposure = "UPLOAD_SIGNAL_ONLY"
+    elif any(signal.startswith(("runtime:", "app:", "header:")) for signal in signals):
+        exposure = "NO_PREREQUISITE_SURFACE_OBSERVED"
+    else:
+        exposure = "RUNTIME_UNKNOWN"
+    priority = {"session": 0, "surface": 1, "app": 2, "header": 3, "runtime": 4, "transport": 5}
+    signals.sort(key=lambda value: (priority.get(value.split(":", 1)[0], 99), value))
+    return tuple(signals), exposure
+
+
+def classify(version: tuple[int, int, int] | None, signals: tuple[str, ...]) -> tuple[str, str, str]:
     if version:
         label = ".".join(map(str, version))
         boundary = FIXED.get(version[:2])
@@ -73,7 +122,7 @@ def classify(version: tuple[int, int, int] | None, headers: list[tuple[str, str]
         if version < boundary:
             return "AFFECTED_VERSION_OBSERVED", f"PHP/{label}", f"below fixed release {'.'.join(map(str, boundary))}"
         return "PATCHED_VERSION_OBSERVED", f"PHP/{label}", f"at or above fixed release {'.'.join(map(str, boundary))}"
-    php_signal = any(token in evidence or token in sample for token in ("phpsessid", "wordpress", "mediawiki", "dokuwiki", "joomla", "codeigniter", "x-powered-by: php"))
+    php_signal = any(signal.startswith(("runtime:", "app:", "header:", "session:")) for signal in signals)
     if php_signal:
         return "RUNTIME_DETECTED_VERSION_HIDDEN", "PHP/application signal", "PHP version was not disclosed"
     return "NO_RUNTIME_EVIDENCE", "none", "reachable HTTP service did not disclose a PHP signal"
@@ -101,49 +150,48 @@ def request(asset: str, timeout: float) -> Result:
                 connection.request(method, path, headers=headers)
                 response = connection.getresponse()
                 code = response.status
-                response_headers = response.getheaders()
+                response_headers.extend(response.getheaders())
                 if method == "GET":
                     body = response.read(MAX_BODY + 1)[:MAX_BODY]
                 else:
                     response.read(MAX_BODY + 1)
             finally:
                 connection.close()
-            if method == "HEAD" and code in {405, 501}:
-                continue
-            break
-        version = version_from(response_headers, body)
-        status, observed, detail = classify(version, response_headers, body)
+        version, version_source = version_from(response_headers, body)
+        signals, exposure = collect_signals(response_headers, body, version, version_source)
+        status, observed, detail = classify(version, signals)
         detail = f"HTTP {code}; {detail}"
     except (OSError, ssl.SSLError, http.client.HTTPException, ValueError) as exc:
-        status, observed, detail = "UNREACHABLE", "none", f"{type(exc).__name__}: {exc}"
-    return Result(asset, status, observed, detail, round((time.monotonic() - started) * 1000))
+        status, exposure, observed = "UNREACHABLE", "NOT_ASSESSED", "none"
+        signals, detail = (), f"{type(exc).__name__}: {exc}"
+    return Result(asset, status, exposure, observed, signals, detail, round((time.monotonic() - started) * 1000))
 
 
 def safe_request(asset: str, timeout: float) -> Result:
     try:
         return request(asset, timeout)
     except Exception as exc:  # keep one malformed endpoint from aborting the asset set
-        return Result(asset, "ERROR", "none", f"{type(exc).__name__}: {exc}", 0)
+        return Result(asset, "ERROR", "NOT_ASSESSED", "none", (), f"{type(exc).__name__}: {exc}", 0)
 
 
 def print_table(results: list[Result]) -> None:
     columns = [
         ("ASSET", [r.asset for r in results]),
         ("STATUS", [r.status for r in results]),
-        ("OBSERVED", [r.observed for r in results]),
-        ("DETAIL", [r.detail for r in results]),
+        ("EXPOSURE", [r.exposure for r in results]),
+        ("SIGNALS", [",".join(r.signals) for r in results]),
     ]
-    widths = [min(max(len(title), *(len(v) for v in values)), cap) for (title, values), cap in zip(columns, (42, 36, 28, 58))]
+    widths = [min(max(len(title), *(len(v) for v in values)), cap) for (title, values), cap in zip(columns, (30, 29, 32, 66))]
     def row(values: list[str]) -> str:
         return "  ".join(value[:width].ljust(width) for value, width in zip(values, widths)).rstrip()
     print(row([title for title, _ in columns]))
     print(row(["-" * width for width in widths]))
     for result in results:
-        print(row([result.asset, result.status, result.observed, result.detail]))
+        print(row([result.asset, result.status, result.exposure, ",".join(result.signals)]))
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Passive multi-asset version triage; does not test exploitation")
+    parser = argparse.ArgumentParser(description="Passive multi-signal asset triage; does not test exploitation")
     parser.add_argument("--assets", required=True, type=Path, help="newline-delimited http(s) URLs")
     parser.add_argument("--workers", type=int, default=4, help=f"concurrent workers (1-{MAX_WORKERS})")
     parser.add_argument("--timeout", type=float, default=5.0, help="per-request timeout in seconds")
