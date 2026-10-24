@@ -27,9 +27,11 @@ does not invoke the PoC, upload a payload, write a remote file, or test RCE/DoS.
 
 ### Defender detection
 
-The [experimental Suricata rule and live lab controls](defense/) detect the
-published multipart producer request shape. Its alert means an attempted
-trigger, including on a patched server; the separate PoC output proves impact.
+The [experimental defender package and live lab controls](defense/) contain a
+PoC-specific Suricata indicator and a PHP startup-OOM worker-sequence
+candidate. The latter matched one affected lab run and stayed negative on the
+same-input patched control. Neither alert alone proves RCE; the separate PoC
+output supplies that proof.
 
 ## Quick Start
 

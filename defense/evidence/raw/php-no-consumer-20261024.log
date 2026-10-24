@@ -1,0 +1,9 @@
+2026-10-24T11:53:12.401530248Z 172.17.0.1 port=58532 [24/Oct/2026:11:53:12 +0000] "GET / HTTP/1.1" 200 15 worker=17 keepalive=0
+2026-10-24T11:53:07.039274131Z AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.17.0.5. Set the 'ServerName' directive globally to suppress this message
+2026-10-24T11:53:12.521293344Z 172.17.0.1 port=58532 [24/Oct/2026:11:53:12 +0000] "POST / HTTP/1.1" 200 476 worker=17 keepalive=1
+2026-10-24T11:53:07.118700562Z AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.17.0.5. Set the 'ServerName' directive globally to suppress this message
+2026-10-24T11:53:07.146704587Z [Sat Oct 24 11:53:07.146394 2026] [mpm_prefork:notice] [pid 1:tid 1] AH00163: Apache/2.4.69 (Debian) PHP/8.4.26 configured -- resuming normal operations
+2026-10-24T11:53:07.146810584Z [Sat Oct 24 11:53:07.146458 2026] [core:notice] [pid 1:tid 1] AH00094: Command line: 'apache2 -D FOREGROUND'
+2026-10-24T11:53:12.405304785Z [Sat Oct 24 11:53:12.404993 2026] [php:warn] [pid 17:tid 17] [client 172.17.0.1:58532] PHP Warning:  PHP Request Startup: Input variables exceeded 1000. To increase the limit change max_input_vars in php.ini. in Unknown on line 0
+2026-10-24T11:53:12.406589139Z [Sat Oct 24 11:53:12.406276 2026] [php:warn] [pid 17:tid 17] [client 172.17.0.1:58532] PHP Warning:  PHP Request Startup: Session cookie cannot be sent after headers have already been sent in Unknown on line 0
+2026-10-24T11:53:12.503266394Z [Sat Oct 24 11:53:12.502560 2026] [php:error] [pid 17:tid 17] [client 172.17.0.1:58532] PHP Fatal error:  Allowed memory size of 134217728 bytes exhausted (tried to allocate 20480 bytes) in Unknown on line 0

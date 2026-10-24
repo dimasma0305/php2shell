@@ -1,6 +1,13 @@
-# Defender detection: PHP upload-progress producer
+# Defender experiments: PHP OOM and upload progress
 
-This package contains one **experimental, alert-only** Suricata rule. It detects
+This package contains two **experimental, alert-only** signals. The network
+rule recognizes one published PoC producer shape. The worker-sequence reference
+evaluator correlates a startup OOM with reuse of that same Apache worker and
+connection. Neither signal proves memory corruption or RCE.
+
+## Published producer shape: Suricata
+
+The Suricata rule detects
 the multipart producer request shape used by the published `poc.py` against the
 PHP 8.4.26 Apache lab. An alert means **attempted trigger shape observed**. It
 does not establish memory corruption or RCE on its own, and the same request
@@ -79,3 +86,45 @@ visibility, or encrypted traffic upstream of the sensor.
 The retained EVE logs include private Docker network addresses only. They were
 recorded from local containers on 24 October 2026. No production traffic or
 third-party system was tested.
+
+## Startup OOM followed by reuse of the same worker
+
+The second analytic uses PHP error logs and Apache access logs with PID, client
+port, and keepalive request number. Its lab-only [Apache logging
+configuration](rules/apache/php-worker-audit.conf) was loaded before each run.
+The [canonical rule](detections/php-startup-oom-reused-worker.yaml) requires a
+startup OOM (`in Unknown on line 0`), the matching POST completion, and a later
+request on that same worker and socket with a greater keepalive number. The
+[reference evaluator](https://github.com/dimasma0305/irai/blob/5bf859e7cfbc6dcb946d012c8dc61e0a6bd9cfda/.agents/skills/soc-detection-engineering/scripts/php_worker_sequence.py)
+lives in the irai skill, keeping helper scripts out of this repository.
+
+| Same-input local control | Reference alerts | Evidence |
+| --- | ---: | --- |
+| PHP 8.4.26: compact multipart producer, then another request on the connection | 1 | [Case](evidence/worker-affected-positive.json) · [full Apache log](evidence/raw/php-affected-worker-20261024.log) |
+| PHP 8.4.27: same producer and continuation | 0 | [Case](evidence/worker-patched-control.json) · [full Apache log](evidence/raw/php-fixed-worker-20261024.log) |
+| PHP 8.4.26: producer OOM, connection closed before a later request | 0 | [Case](evidence/worker-near-miss.json) · [full Apache log](evidence/raw/php-no-consumer-20261024.log) |
+| PHP 8.4.26: ordinary GET | 0 | [Case](evidence/worker-benign.json) · [full Apache log](evidence/raw/php-benign-get-20261024.log) |
+
+For these four exact lab cases the attempted-trigger *candidate* has TP=1,
+FP=0, TN=3, FN=0. On the affected run, worker 104 logged startup OOM during
+the POST and served the next request on the same socket (`keepalive=1` then
+`keepalive=2`). The same producer on PHP 8.4.27 did not log OOM. The collector
+may interleave stdout and stderr out of order, so the evaluator uses timestamps
+and the worker/socket keys. These counts are not a field false-positive or
+false-negative estimate.
+
+To inspect the retained evidence from an irai checkout:
+
+```shell
+python <irai-checkout>/.agents/skills/soc-detection-engineering/scripts/php_worker_sequence.py defense/evidence/raw/php-affected-worker-20261024.log
+python <irai-checkout>/.agents/skills/soc-detection-engineering/scripts/php_worker_sequence.py defense/evidence/raw/php-fixed-worker-20261024.log
+```
+
+The test producer calls `StockReproducer.compact_oom(execution=False)` from the
+published `poc.py` on `KeepAliveEndpoint`, using its 17-byte `S` boundary and
+the same cookie spray, then sends a GET on that connection. The near miss
+closes the connection after the POST. This evaluator does not inspect PHP
+pointer ownership, so its alert cannot establish CVE-2026-109619's stale
+global dereference or a successful exploit. It also misses producers that do
+not use OOM and consumers reached on another connection. The [playbook](playbooks/php-startup-oom-reused-worker.md)
+records these triage limits.
