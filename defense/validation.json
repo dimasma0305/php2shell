@@ -20,6 +20,26 @@
         {"id": "php-benign-20261024", "role": "benign", "expected_alert": false, "evidence": "defense/evidence/benign.json"},
         {"id": "php-near-miss-20261024", "role": "near_miss", "expected_alert": false, "evidence": "defense/evidence/near-miss.json"}
       ]
+    },
+    {
+      "id": "php-startup-oom-reused-worker",
+      "owner": "dimasma0305",
+      "status": "experimental",
+      "claim": "attempted_trigger",
+      "sensor": {
+        "location": "runtime",
+        "source": "Apache access and PHP error logs with worker PID, client port, and keepalive counter",
+        "required_fields": ["event_id", "worker_pid", "client", "kind", "timestamp"]
+      },
+      "analytic": "defense/detections/php-startup-oom-reused-worker.yaml",
+      "rule": "defense/rules/apache/php-worker-audit.conf",
+      "playbook": "defense/playbooks/php-startup-oom-reused-worker.md",
+      "cases": [
+        {"id": "php-worker-affected-positive-20261024", "role": "affected_positive", "expected_alert": true, "evidence": "defense/evidence/worker-affected-positive.json"},
+        {"id": "php-worker-patched-control-20261024", "role": "patched_control", "expected_alert": false, "evidence": "defense/evidence/worker-patched-control.json"},
+        {"id": "php-worker-benign-20261024", "role": "benign", "expected_alert": false, "evidence": "defense/evidence/worker-benign.json"},
+        {"id": "php-worker-near-miss-20261024", "role": "near_miss", "expected_alert": false, "evidence": "defense/evidence/worker-near-miss.json"}
+      ]
     }
   ]
 }
