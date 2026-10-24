@@ -6,14 +6,14 @@ No production-ready detection is shipped. The Suricata rule is a lab-tested cand
 
 | Detection | Use | Claim | Sensor | Lab cases |
 | --- | --- | --- | --- | --- |
-| [php-upload-progress-producer](#php-upload-progress-producer) | Rule for evaluation | attempted_trigger | ingress | TP=2 FP=0 TN=2 FN=0 |
-| [php-startup-oom-reused-worker](#php-startup-oom-reused-worker) | Lab test only | attempted_trigger | runtime | TP=1 FP=0 TN=3 FN=0 |
+| [php-upload-progress-producer](#php-upload-progress-producer) | Rule for evaluation | attempted_trigger | ingress | TP=2 FP=1 TN=2 FN=0 UNKNOWN=0 |
+| [php-startup-oom-reused-worker](#php-startup-oom-reused-worker) | Lab test only | attempted_trigger | runtime | TP=1 FP=0 TN=3 FN=0 UNKNOWN=0 |
 
 ## php-upload-progress-producer
 
 ### Claim and scope
 
-Claim: attempted_trigger. Status: experimental. Use: Rule for evaluation. The rule saw the published PoC's multipart upload-progress request shape. The patched lab also alerts because it receives the same attempt shape.
+Claim: attempted_trigger. Status: experimental. Use: Rule for evaluation. The rule saw the published PoC's multipart upload-progress request shape. The patched lab also alerts because it receives the same attempt shape. A normal upload with the same boundary and field also alerted, so the signal does not establish attacker intent.
 
 ### Telemetry and method
 
@@ -21,12 +21,13 @@ Suricata 8.0.7 reads plaintext HTTP on the Apache container's `eth0`. The [analy
 
 ### Evidence
 
-| Case | Expected | Observed alerts | Evidence | Raw log |
-| --- | --- | ---: | --- | --- |
-| PHP 8.4.26 PoC | Alert | 2 | [Case](evidence/affected-positive.json) | [EVE](evidence/raw/affected-positive.jsonl) |
-| PHP 8.4.27 same shape | Alert | 1 | [Case](evidence/patched-control.json) | [EVE](evidence/raw/patched-control.jsonl) |
-| Ordinary upload progress | No alert | 0 | [Case](evidence/benign.json) | [EVE](evidence/raw/benign.jsonl) |
-| Boundary without field | No alert | 0 | [Case](evidence/near-miss.json) | [EVE](evidence/raw/near-miss.jsonl) |
+| Case | Expected | Observed alerts | Capture health | Evidence | Raw log |
+| --- | --- | ---: | --- | --- | --- |
+| PHP 8.4.26 PoC | Alert | 2 | loss_reported | [Case](evidence/affected-positive.json) | [EVE](evidence/raw/affected-positive.jsonl) |
+| PHP 8.4.27 same shape | Alert | 1 | no_loss_reported | [Case](evidence/patched-control.json) | [EVE](evidence/raw/patched-control.jsonl) |
+| Ordinary upload progress | No alert | 0 | no_loss_reported | [Case](evidence/benign.json) | [EVE](evidence/raw/benign.jsonl) |
+| Boundary without field | No alert | 0 | no_loss_reported | [Case](evidence/near-miss.json) | [EVE](evidence/raw/near-miss.jsonl) |
+| Benign upload, same boundary | No alert | 1 | no_loss_reported | [Case](evidence/benign-fixed-boundary.json) | [EVE](evidence/raw/benign-fixed-boundary.jsonl) |
 
 ### Reproduce
 
@@ -49,7 +50,7 @@ Look for SID `9000618` in `.tools/defense-php/eve.json`. The PoC's fresh `uid=` 
 
 ### Limits and next step
 
-This rule matches one PoC boundary and misses changed boundaries or traffic encrypted before the sensor. The positive capture had 1,238 kernel packet drops, so a missing alert cannot establish safety. Use the [playbook](playbooks/php-upload-progress-producer.md) to inspect the full request, PHP build, worker identity, and nearby failures before attributing the event.
+This rule matches one PoC boundary and misses changed boundaries or traffic encrypted before the sensor. The positive capture had 1,238 kernel packet drops and two TCP reassembly gaps. A benign request with the same boundary produced one false positive with zero reported loss. Use the [playbook](playbooks/php-upload-progress-producer.md) to inspect the full request, PHP build, worker identity, and nearby failures before attributing the event. Keep the rule in alert-only evaluation; it cannot support automatic blocking.
 
 ## php-startup-oom-reused-worker
 
@@ -63,12 +64,12 @@ The [test description](test/php-startup-oom-reused-worker/analytic.yaml) require
 
 ### Evidence
 
-| Case | Expected | Observed alerts | Evidence | Raw log |
-| --- | --- | ---: | --- | --- |
-| PHP 8.4.26 OOM then reuse | Alert | 1 | [Case](evidence/worker-affected-positive.json) | [Apache](evidence/raw/php-affected-worker-20261024.log) |
-| PHP 8.4.27 same input | No alert | 0 | [Case](evidence/worker-patched-control.json) | [Apache](evidence/raw/php-fixed-worker-20261024.log) |
-| Ordinary GET | No alert | 0 | [Case](evidence/worker-benign.json) | [Apache](evidence/raw/php-benign-get-20261024.log) |
-| OOM without later request | No alert | 0 | [Case](evidence/worker-near-miss.json) | [Apache](evidence/raw/php-no-consumer-20261024.log) |
+| Case | Expected | Observed alerts | Capture health | Evidence | Raw log |
+| --- | --- | ---: | --- | --- | --- |
+| PHP 8.4.26 OOM then reuse | Alert | 1 | N/A | [Case](evidence/worker-affected-positive.json) | [Apache](evidence/raw/php-affected-worker-20261024.log) |
+| PHP 8.4.27 same input | No alert | 0 | N/A | [Case](evidence/worker-patched-control.json) | [Apache](evidence/raw/php-fixed-worker-20261024.log) |
+| Ordinary GET | No alert | 0 | N/A | [Case](evidence/worker-benign.json) | [Apache](evidence/raw/php-benign-get-20261024.log) |
+| OOM without later request | No alert | 0 | N/A | [Case](evidence/worker-near-miss.json) | [Apache](evidence/raw/php-no-consumer-20261024.log) |
 
 ### Reproduce
 
@@ -91,4 +92,4 @@ The [manifest](validation.json) fixes the claims, sensors, case labels, and evid
 python <irai-checkout>/.agents/skills/soc-detection-engineering/scripts/check_detection.py --repo . --revision HEAD --summary
 ```
 
-The check recomputes these small lab counts and reconciles selected events with committed raw logs. A static pass does not prove a live alert, full coverage, or a production false-positive rate.
+The check recomputes these small lab counts and reconciles selected events and final capture statistics with committed raw logs. `loss_reported` means packet drops or TCP reassembly gaps; `no_loss_reported` means neither was reported, not complete capture. A static pass does not prove a live alert, full coverage, or a production false-positive rate.

@@ -1,0 +1,139 @@
+{
+  "case_id": "php-benign-fixed-boundary-20261025",
+  "detection_id": "php-upload-progress-producer",
+  "capture": {
+    "mode": "live_lab",
+    "command": "PowerShell Invoke-WebRequest -Uri 'http://127.0.0.1:18082/?case=benign-fixed-boundary' -Method Post -Body $body -ContentType 'multipart/form-data; boundary=SSSSSSSSSSSSSSSSS'; body contains ordinary PHPSESSID, ordinary PHP_SESSION_UPLOAD_PROGRESS, and note.txt='hello'",
+    "collector": "Suricata 8.0.7 pcap on target container eth0; EVE JSON",
+    "backend": "Suricata signature sid 9000618 rev 4",
+    "lab": "PHP 8.4.26 Apache stock lab, php2shell-php-apache image",
+    "captured_at": "2026-10-24T22:18:38.089359+00:00",
+    "raw_log": "defense/evidence/raw/benign-fixed-boundary.jsonl",
+    "raw_log_sha256": "df9cde0dcb44d1c1122048e2a8fa99ade89c2bb4c30dfc6567a952b4843fde8c",
+    "eve_event_count": 10,
+    "eve_alert_count": 1,
+    "kernel_packets": 10,
+    "kernel_drops": 0,
+    "reassembly_gap": 0,
+    "capture_health": "no_loss_reported",
+    "operator_result": "HTTP 200; ordinary upload only; no exploit payload or command"
+  },
+  "raw_events": [
+    {
+      "event_id": "1755666802593713:0",
+      "eve_sha256": "dd7fdb696c036ea3d9d3bc9e252f1c28bd1c6bb3ab7bc5aa3b599aa83bc33d44",
+      "eve": {
+        "timestamp": "2026-10-24T22:18:38.089359+0000",
+        "flow_id": 1755666802593713,
+        "in_iface": "eth0",
+        "event_type": "alert",
+        "src_ip": "172.17.0.1",
+        "src_port": 57470,
+        "dest_ip": "172.17.0.2",
+        "dest_port": 80,
+        "proto": "TCP",
+        "ip_v": 4,
+        "pkt_src": "wire/pcap",
+        "tx_id": 0,
+        "alert": {
+          "action": "allowed",
+          "gid": 1,
+          "signature_id": 9000618,
+          "rev": 4,
+          "signature": "PHP published upload-progress producer shape",
+          "category": "",
+          "severity": 3
+        },
+        "ts_progress": "request_complete",
+        "tc_progress": "response_complete",
+        "http": {
+          "hostname": "127.0.0.1",
+          "http_port": 18082,
+          "url": "/?case=benign-fixed-boundary",
+          "http_user_agent": "Mozilla/5.0 (Windows NT 10.0; Microsoft Windows 10.0.26200; en-US) PowerShell/7.6.5",
+          "http_content_type": "text/plain",
+          "http_method": "POST",
+          "protocol": "HTTP/1.1",
+          "status": 200,
+          "length": 15
+        },
+        "app_proto": "http",
+        "direction": "to_server",
+        "flow": {
+          "pkts_toserver": 4,
+          "pkts_toclient": 3,
+          "bytes_toserver": 890,
+          "bytes_toclient": 395,
+          "start": "2026-10-24T22:18:38.081093+0000",
+          "src_ip": "172.17.0.1",
+          "dest_ip": "172.17.0.2",
+          "src_port": 57470,
+          "dest_port": 80
+        }
+      }
+    },
+    {
+      "event_id": "1755666802593713:0",
+      "eve_sha256": "0467cf15296655e1dc73141f0285faab112a757c3006e9d0841d6452b339bfae",
+      "eve": {
+        "timestamp": "2026-10-24T22:18:38.089359+0000",
+        "flow_id": 1755666802593713,
+        "in_iface": "eth0",
+        "event_type": "http",
+        "src_ip": "172.17.0.1",
+        "src_port": 57470,
+        "dest_ip": "172.17.0.2",
+        "dest_port": 80,
+        "proto": "TCP",
+        "ip_v": 4,
+        "pkt_src": "wire/pcap",
+        "tx_id": 0,
+        "http": {
+          "hostname": "127.0.0.1",
+          "http_port": 18082,
+          "url": "/?case=benign-fixed-boundary",
+          "http_user_agent": "Mozilla/5.0 (Windows NT 10.0; Microsoft Windows 10.0.26200; en-US) PowerShell/7.6.5",
+          "http_content_type": "text/plain",
+          "http_method": "POST",
+          "protocol": "HTTP/1.1",
+          "status": 200,
+          "length": 15
+        }
+      }
+    }
+  ],
+  "normalized_events": [
+    {
+      "event_id": "1755666802593713:0",
+      "flow_id": "1755666802593713",
+      "src_ip": "172.17.0.1",
+      "dest_ip": "172.17.0.2",
+      "protocol": "TCP",
+      "service_port": 80,
+      "http_method": "POST",
+      "url": "/?case=benign-fixed-boundary"
+    },
+    {
+      "event_id": "1755666802593713:0",
+      "flow_id": "1755666802593713",
+      "src_ip": "172.17.0.1",
+      "dest_ip": "172.17.0.2",
+      "protocol": "TCP",
+      "service_port": 80,
+      "http_method": "POST",
+      "url": "/?case=benign-fixed-boundary"
+    }
+  ],
+  "alerts": [
+    {
+      "case_id": "php-benign-fixed-boundary-20261025",
+      "detection_id": "php-upload-progress-producer",
+      "source_event_ids": [
+        "1755666802593713:0"
+      ],
+      "eve_sha256": "dd7fdb696c036ea3d9d3bc9e252f1c28bd1c6bb3ab7bc5aa3b599aa83bc33d44",
+      "signature_id": 9000618,
+      "revision": 4
+    }
+  ]
+}
