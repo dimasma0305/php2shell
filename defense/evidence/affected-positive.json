@@ -14,7 +14,9 @@
     "eve_alert_count": 2,
     "kernel_packets": 65901,
     "kernel_drops": 1238,
-    "operator_result": "PROOF: uid=33(www-data) gid=33(www-data) groups=33(www-data)"
+    "operator_result": "PROOF: uid=33(www-data) gid=33(www-data) groups=33(www-data)",
+    "reassembly_gap": 2,
+    "capture_health": "loss_reported"
   },
   "raw_events": [
     {

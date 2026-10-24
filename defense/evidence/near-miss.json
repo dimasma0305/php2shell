@@ -13,7 +13,9 @@
     "eve_event_count": 6,
     "eve_alert_count": 0,
     "kernel_packets": 12,
-    "kernel_drops": 0
+    "kernel_drops": 0,
+    "reassembly_gap": 0,
+    "capture_health": "no_loss_reported"
   },
   "raw_events": [
     {

@@ -2,7 +2,8 @@
 
 1. Confirm SID `9000618`, source and destination, URI, timestamp, and Suricata
    `flow_id`. Check for packet drops before deciding that no neighboring
-   request exists.
+   request exists. The retained benign same-boundary upload also triggered this
+   signature, so treat it as a triage lead only.
 2. Retrieve the full request at the TLS terminator or application gateway if
    policy permits. Validate that it is a multipart POST and inspect the
    upload-progress field, body size, session identifier, and repeated form
