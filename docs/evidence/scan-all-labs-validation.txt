@@ -1,0 +1,45 @@
+Passive all-lab scanner validation
+==================================
+
+Recorded: 2026-10-24T16:22:15+08:00
+Base revision: 96fb63ee1b026f3355e16eb56e31081b3095b77b
+Assets SHA-256: 6ad9eb3ff8d85e11b87d40605a6cc8f3250c106a3827d7a50a1ac3236b074937
+Setup: docker compose -f compose.scan.yaml up -d --build
+Scanner: python scan.py --assets assets.txt
+Recorder: vhs docs/demo/scan-all-labs.tape
+
+Safety boundary
+---------------
+
+The scanner issued bounded HEAD/GET requests only. It did not import or invoke
+poc.py, upload a body, write a target file, execute a command, restart a worker,
+or use the Docker control plane.
+
+Observed results
+----------------
+
+http://127.0.0.1:18173/  AFFECTED_VERSION_OBSERVED  PHP/8.4.26  HTTP 200
+http://127.0.0.1:18081/  AFFECTED_VERSION_OBSERVED  PHP/8.4.26  HTTP 200
+http://127.0.0.1:18083/  AFFECTED_VERSION_OBSERVED  PHP/8.4.26  HTTP 302
+http://127.0.0.1:18086/  AFFECTED_VERSION_OBSERVED  PHP/8.4.26  HTTP 302
+http://127.0.0.1:18082/  AFFECTED_VERSION_OBSERVED  PHP/8.4.26  HTTP 200
+http://127.0.0.1:18087/  AFFECTED_VERSION_OBSERVED  PHP/8.4.26  HTTP 404
+
+Postcondition
+-------------
+
+All six application containers and the WordPress database were running before
+and after the live VHS take. Every container reported RestartCount=0. The raw
+same-take transcript is docs/demo/scan-all-labs.ascii; it contains the typed
+public command and the six results above.
+
+Image identities
+----------------
+
+php-apache  sha256:da594f1d821f75ebeee4e67e6b1d94ae64ad4e50f8b2692eda5bf32eef0a9083
+wordpress   sha256:a3d9b4945cbcf93626e20b8798949f07a2a445bb00362fc79f686aa860ef1f9a
+joomla      sha256:2db7882ea5e7e0f8f0cce72a5e26fa242e648d50f1cee9a97a1f41595c491433
+codeigniter sha256:1d8a6f88309a0828a4f8d2684e9c05e8afe9052207734f756b64e2435f4b164b
+mediawiki   sha256:c554233293acb94c582886f782c9377b279c1b66b3f5bd6f919990e74187fd7e
+dokuwiki    sha256:a62df3fb362ec5e8c5c3bc61d3e59c04fd9b10a66a3f9623d8c04073094600bb
+mariadb     sha256:f16d7a344413e519dff518f27bdb221388f84b0d274c97c4fb5f2cb0dc1b34fa

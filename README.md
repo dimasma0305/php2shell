@@ -3,8 +3,9 @@
 > **Disclaimer**
 >
 > Use this repository only with the included local labs or another system you
-> are explicitly authorized to test. The published client accepts only the
-> loopback lab targets documented below. Read
+> are explicitly authorized to test. The exploit client accepts only the
+> loopback lab targets documented below; use the passive scanner only on
+> assets you are authorized to assess. Read
 > [`AUTHORIZED_USE.md`](AUTHORIZED_USE.md) before use.
 
 `php2shell` is a reproducible proof of concept for CVE-2026-109618 and
@@ -12,7 +13,16 @@ CVE-2026-109619. On the verified PHP 8.4.26 Apache layout, it leaks the Zend MM
 heap and loaded `libphp` bases. An RCE result is accepted only when the exploit
 executes `id` and retrieves fresh output containing both `uid=` and `gid=`.
 
+### Verified PoC
+
 ![Live WordPress PoC with id output](docs/demo/wordpress.gif)
+
+### Safe Multi-Asset Scan
+
+![Live passive scan of every included lab](docs/demo/scan-all-labs.gif)
+
+The scanner performs bounded, ordinary HTTP requests only. It does not invoke
+the PoC, upload a payload, write a remote file, or test RCE/DoS.
 
 ## Quick Start
 
@@ -41,6 +51,24 @@ Stop the lab when finished:
 ```bash
 docker compose -f lab/8.4.26/wordpress/compose.yaml down -v
 ```
+
+## Safe Multi-Asset Scanner
+
+Start the included labs, place one authorized HTTP(S) URL per line in
+`assets.txt`, then run:
+
+```bash
+docker compose -f compose.scan.yaml up -d --build
+python scan.py --assets assets.txt
+docker compose -f compose.scan.yaml down -v
+```
+
+The output distinguishes an observed affected or patched PHP version from a
+hidden/unknown version. It never treats reachability as proof of vulnerability
+or safety. [VHS tape](docs/demo/scan-all-labs.tape) ·
+[MP4](docs/demo/scan-all-labs.mp4) ·
+[Raw terminal output](docs/demo/scan-all-labs.ascii) ·
+[Validation record](docs/evidence/scan-all-labs-validation.txt)
 
 ## Labs
 
@@ -219,6 +247,17 @@ Useful profile checks:
 ./poc.py --list-profiles
 python3 -u poc.py --url http://127.0.0.1:18173/ --check-profile
 ```
+
+## Scanner Limitations
+
+- The scanner can assess only an exact PHP version naturally disclosed in an
+  HTTP response. A hidden version remains unknown.
+- A reported affected version is version triage, not proof that the vulnerable
+  request path, SAPI, heap layout, or RCE prerequisites are present.
+- A reported patched version covers these two CVEs only; it is not a general
+  security assessment of the application.
+- Redirects are not followed, response bodies are capped at 64 KiB, and TLS
+  certificate verification stays enabled.
 
 ## Reference
 
