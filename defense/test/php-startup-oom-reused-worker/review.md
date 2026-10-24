@@ -1,4 +1,6 @@
-# PHP startup-OOM worker reuse candidate
+# Lab-only review: PHP startup-OOM worker reuse
+
+This reviews retained test evidence. It is not a SOC response playbook.
 
 1. Verify that the OOM log says `in Unknown on line 0` and that its PID and
    client socket match the producer POST access record.
