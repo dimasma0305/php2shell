@@ -1,8 +1,8 @@
 Passive all-lab scanner validation
 ==================================
 
-Recorded: 2026-10-24T16:22:15+08:00
-Base revision: 96fb63ee1b026f3355e16eb56e31081b3095b77b
+Recorded: 2026-10-24T16:38:33+08:00
+Base revision: 6e1c19a6ff750b5e49be29455df0db63c80a70aa
 Assets SHA-256: 6ad9eb3ff8d85e11b87d40605a6cc8f3250c106a3827d7a50a1ac3236b074937
 Setup: docker compose -f compose.scan.yaml up -d --build
 Scanner: python scan.py --assets assets.txt
@@ -11,19 +11,24 @@ Recorder: vhs docs/demo/scan-all-labs.tape
 Safety boundary
 ---------------
 
-The scanner issued bounded HEAD/GET requests only. It did not import or invoke
-poc.py, upload a body, write a target file, execute a command, restart a worker,
-or use the Docker control plane.
+The scanner issued bounded HEAD and GET requests only. It correlated exact PHP
+identity, HTTP/runtime headers, application fingerprints, session cookies, and
+visible upload surfaces. It did not import or invoke poc.py, upload a body,
+write a target file, execute a command, restart a worker, or use Docker.
 
 Observed results
 ----------------
 
-http://127.0.0.1:18173/  AFFECTED_VERSION_OBSERVED  PHP/8.4.26  HTTP 200
-http://127.0.0.1:18081/  AFFECTED_VERSION_OBSERVED  PHP/8.4.26  HTTP 200
-http://127.0.0.1:18083/  AFFECTED_VERSION_OBSERVED  PHP/8.4.26  HTTP 302
-http://127.0.0.1:18086/  AFFECTED_VERSION_OBSERVED  PHP/8.4.26  HTTP 302
-http://127.0.0.1:18082/  AFFECTED_VERSION_OBSERVED  PHP/8.4.26  HTTP 200
-http://127.0.0.1:18087/  AFFECTED_VERSION_OBSERVED  PHP/8.4.26  HTTP 404
+http://127.0.0.1:18173/  AFFECTED_VERSION_OBSERVED  NO_PREREQUISITE_SURFACE_OBSERVED  app:wordpress
+http://127.0.0.1:18081/  AFFECTED_VERSION_OBSERVED  NO_PREREQUISITE_SURFACE_OBSERVED  app:mediawiki
+http://127.0.0.1:18083/  AFFECTED_VERSION_OBSERVED  NO_PREREQUISITE_SURFACE_OBSERVED  app:dokuwiki
+http://127.0.0.1:18086/  AFFECTED_VERSION_OBSERVED  NO_PREREQUISITE_SURFACE_OBSERVED  PHP/8.4.26 header
+http://127.0.0.1:18082/  AFFECTED_VERSION_OBSERVED  NO_PREREQUISITE_SURFACE_OBSERVED  PHP/8.4.26 header
+http://127.0.0.1:18087/  AFFECTED_VERSION_OBSERVED  NO_PREREQUISITE_SURFACE_OBSERVED  app:codeigniter
+
+Every row also recorded transport:http, runtime:php/8.4.26@header, and
+header:x-powered-by-php. No requested page exposed a PHPSESSID cookie or upload
+form; that route-local absence is not evidence that other routes lack them.
 
 Postcondition
 -------------

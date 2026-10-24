@@ -278,22 +278,22 @@
 > python scan.py --assets assets.txt
 [*] loaded 6 unique assets from assets.txt
 [*] passive mode: bounded HEAD/GET only; no exploit or availability test
-ASSET                    STATUS                     OBSERVED    DETAIL
------------------------  -------------------------  ----------  ------------------------------------
-http://127.0.0.1:18173/  AFFECTED_VERSION_OBSERVED  PHP/8.4.26  HTTP 200; below fixed release 8.4.27
-http://127.0.0.1:18081/  AFFECTED_VERSION_OBSERVED  PHP/8.4.26  HTTP 200; below fixed release 8.4.27
-http://127.0.0.1:18083/  AFFECTED_VERSION_OBSERVED  PHP/8.4.26  HTTP 302; below fixed release 8.4.27
-http://127.0.0.1:18086/  AFFECTED_VERSION_OBSERVED  PHP/8.4.26  HTTP 302; below fixed release 8.4.27
-http://127.0.0.1:18082/  AFFECTED_VERSION_OBSERVED  PHP/8.4.26  HTTP 200; below fixed release 8.4.27
-http://127.0.0.1:18087/  AFFECTED_VERSION_OBSERVED  PHP/8.4.26  HTTP 404; below fixed release 8.4.27
+ASSET                    STATUS                     EXPOSURE                          SIGNALS
+-----------------------  -------------------------  --------------------------------  -----------------------------------------------------------
+-------
+http://127.0.0.1:18173/  AFFECTED_VERSION_OBSERVED  NO_PREREQUISITE_SURFACE_OBSERVED  app:wordpress,header:x-powered-by-php,runtime:php/8.4.26@he
+ader,tr
+http://127.0.0.1:18081/  AFFECTED_VERSION_OBSERVED  NO_PREREQUISITE_SURFACE_OBSERVED  app:mediawiki,header:x-powered-by-php,runtime:php/8.4.26@he
+ader,tr
+http://127.0.0.1:18083/  AFFECTED_VERSION_OBSERVED  NO_PREREQUISITE_SURFACE_OBSERVED  app:dokuwiki,header:x-powered-by-php,runtime:php/8.4.26@hea
+der,tra
+http://127.0.0.1:18086/  AFFECTED_VERSION_OBSERVED  NO_PREREQUISITE_SURFACE_OBSERVED  header:x-powered-by-php,runtime:php/8.4.26@header,transport
+:http
+http://127.0.0.1:18082/  AFFECTED_VERSION_OBSERVED  NO_PREREQUISITE_SURFACE_OBSERVED  header:x-powered-by-php,runtime:php/8.4.26@header,transport
+:http
+http://127.0.0.1:18087/  AFFECTED_VERSION_OBSERVED  NO_PREREQUISITE_SURFACE_OBSERVED  app:codeigniter,header:x-powered-by-php,runtime:php/8.4.26@
+header,
 [*] summary AFFECTED_VERSION_OBSERVED=6
-
-
-
-
-
-
-
 
 
 
@@ -301,23 +301,23 @@ http://127.0.0.1:18087/  AFFECTED_VERSION_OBSERVED  PHP/8.4.26  HTTP 404; below 
 > python scan.py --assets assets.txt
 [*] loaded 6 unique assets from assets.txt
 [*] passive mode: bounded HEAD/GET only; no exploit or availability test
-ASSET                    STATUS                     OBSERVED    DETAIL
------------------------  -------------------------  ----------  ------------------------------------
-http://127.0.0.1:18173/  AFFECTED_VERSION_OBSERVED  PHP/8.4.26  HTTP 200; below fixed release 8.4.27
-http://127.0.0.1:18081/  AFFECTED_VERSION_OBSERVED  PHP/8.4.26  HTTP 200; below fixed release 8.4.27
-http://127.0.0.1:18083/  AFFECTED_VERSION_OBSERVED  PHP/8.4.26  HTTP 302; below fixed release 8.4.27
-http://127.0.0.1:18086/  AFFECTED_VERSION_OBSERVED  PHP/8.4.26  HTTP 302; below fixed release 8.4.27
-http://127.0.0.1:18082/  AFFECTED_VERSION_OBSERVED  PHP/8.4.26  HTTP 200; below fixed release 8.4.27
-http://127.0.0.1:18087/  AFFECTED_VERSION_OBSERVED  PHP/8.4.26  HTTP 404; below fixed release 8.4.27
+ASSET                    STATUS                     EXPOSURE                          SIGNALS
+-----------------------  -------------------------  --------------------------------  -----------------------------------------------------------
+-------
+http://127.0.0.1:18173/  AFFECTED_VERSION_OBSERVED  NO_PREREQUISITE_SURFACE_OBSERVED  app:wordpress,header:x-powered-by-php,runtime:php/8.4.26@he
+ader,tr
+http://127.0.0.1:18081/  AFFECTED_VERSION_OBSERVED  NO_PREREQUISITE_SURFACE_OBSERVED  app:mediawiki,header:x-powered-by-php,runtime:php/8.4.26@he
+ader,tr
+http://127.0.0.1:18083/  AFFECTED_VERSION_OBSERVED  NO_PREREQUISITE_SURFACE_OBSERVED  app:dokuwiki,header:x-powered-by-php,runtime:php/8.4.26@hea
+der,tra
+http://127.0.0.1:18086/  AFFECTED_VERSION_OBSERVED  NO_PREREQUISITE_SURFACE_OBSERVED  header:x-powered-by-php,runtime:php/8.4.26@header,transport
+:http
+http://127.0.0.1:18082/  AFFECTED_VERSION_OBSERVED  NO_PREREQUISITE_SURFACE_OBSERVED  header:x-powered-by-php,runtime:php/8.4.26@header,transport
+:http
+http://127.0.0.1:18087/  AFFECTED_VERSION_OBSERVED  NO_PREREQUISITE_SURFACE_OBSERVED  app:codeigniter,header:x-powered-by-php,runtime:php/8.4.26@
+header,
 [*] summary AFFECTED_VERSION_OBSERVED=6
 >
-
-
-
-
-
-
-
 
 
 ────────────────────────────────────────────────────────────────────────────────
