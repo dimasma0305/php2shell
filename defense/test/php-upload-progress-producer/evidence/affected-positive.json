@@ -8,7 +8,7 @@
     "backend": "Suricata signature sid 9000618 rev 4",
     "lab": "PHP 8.4.26 Apache stock lab, php2shell-php-apache image",
     "captured_at": "2026-10-24T10:50:05.838659+00:00",
-    "raw_log": "defense/evidence/raw/affected-positive.jsonl",
+    "raw_log": "defense/test/php-upload-progress-producer/evidence/raw/affected-positive.jsonl",
     "raw_log_sha256": "47039b0da50e76fe215aaf71c1c36890594b5d8f4daf18f7d0d0b208731ca887",
     "eve_event_count": 60,
     "eve_alert_count": 2,

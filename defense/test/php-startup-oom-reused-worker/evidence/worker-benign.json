@@ -8,7 +8,7 @@
     "backend": "Apache worker sequence reference evaluator v1",
     "lab": "PHP 8.4.26 Apache",
     "captured_at": "2026-10-24T11:53:07.260311+00:00",
-    "raw_log": "defense/evidence/raw/php-benign-get-20261024.log",
+    "raw_log": "defense/test/php-startup-oom-reused-worker/evidence/raw/php-benign-get-20261024.log",
     "raw_log_sha256": "8b763740dc9b0cf879831b7585a816f3d9e86b428d7f1aca9fabe7f7eef2a49a",
     "line_count": 5,
     "reference_result_count": 0
