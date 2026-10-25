@@ -1,34 +1,103 @@
 {
-  "case_id": "php-affected-positive-20261024",
+  "case_id": "php-affected-positive-replay-20261025",
   "detection_id": "php-upload-progress-producer",
   "capture": {
-    "mode": "live_lab",
-    "command": "python -u poc.py --url http://127.0.0.1:18082/ --retries 1",
-    "collector": "Suricata 8.0.7 pcap on target container eth0; EVE JSON",
+    "mode": "live_lab_replay",
+    "command": "tcpdump -i eth0 -s 0 -B 65536 -U -w /tmp/positive.pcap 'tcp port 80'",
+    "collector": "tcpdump on lab container eth0, then Suricata 8.0.7 offline PCAP replay",
     "backend": "Suricata signature sid 9000618 rev 4",
-    "lab": "PHP 8.4.26 Apache stock lab, php2shell-php-apache image",
-    "captured_at": "2026-10-24T10:50:05.838659+00:00",
+    "lab": "PHP 8.4.26 Apache; PoC returned fresh uid/gid",
+    "captured_at": "2026-10-25T00:34:56.213511+0000",
     "raw_log": "defense/test/php-upload-progress-producer/evidence/raw/affected-positive.jsonl",
-    "raw_log_sha256": "47039b0da50e76fe215aaf71c1c36890594b5d8f4daf18f7d0d0b208731ca887",
-    "eve_event_count": 60,
+    "raw_log_sha256": "c0a8324c7e9a95bc4cf8af8d1fc0736d649d15f26c245563f8d896a2415c8516",
+    "eve_event_count": 37,
     "eve_alert_count": 2,
-    "kernel_packets": 65901,
-    "kernel_drops": 1238,
-    "operator_result": "PROOF: uid=33(www-data) gid=33(www-data) groups=33(www-data)",
-    "reassembly_gap": 2,
-    "capture_health": "loss_reported"
+    "pcap": "defense/test/php-upload-progress-producer/evidence/raw/affected-positive.pcap.gz",
+    "pcap_sha256": "8c655ba0b936640675e38bfd82f04e10a08630f6b6d6c2ba7bc433ddfa3398dc",
+    "pcap_packet_count": 71832,
+    "pcap_truncated_packets": 0,
+    "tcpdump_log": "defense/test/php-upload-progress-producer/evidence/raw/affected-positive.tcpdump.log",
+    "tcpdump_log_sha256": "2e2503a07e7bdba2685f226d5997b903c99817e87570c432f3ccc5ad3350827a",
+    "kernel_packets": 71832,
+    "tcpdump_received": 71832,
+    "kernel_drops": 0,
+    "reassembly_gap": 0,
+    "capture_health": "no_loss_reported",
+    "replay_image": "jasonish/suricata@sha256:bf4bea5b45d9c10265a3ee6628e2ec8930b9d1fb7caf9d1afb63af413b9cbb26",
+    "rule_sha256": "a632f81f32b53cb18645a68f14fabb9d1d7f0fbba67a50fc7ca635087c75a59a",
+    "replay_command": "suricata -r /work/case.pcap -k none -S /work/local.rules -l /work/logs"
   },
   "raw_events": [
     {
-      "event_id": "1411033079224228:0",
-      "eve_sha256": "b3478af3830c557e44aab8c15d83d378566cc8b2d59a081a38e7fbd675da567c",
+      "event_id": "47589732301298:0",
+      "eve_sha256": "9824bcc84bb7cced4a8484abc29cda01e1060573d6fd6ac989c9f93b65c4476a",
       "eve": {
-        "timestamp": "2026-10-24T10:50:05.838659+0000",
-        "flow_id": 1411033079224228,
-        "in_iface": "eth0",
+        "timestamp": "2026-10-25T00:34:56.438537+0000",
+        "flow_id": 47589732301298,
+        "pcap_cnt": 3362,
         "event_type": "alert",
         "src_ip": "172.17.0.1",
-        "src_port": 45702,
+        "src_port": 43340,
+        "dest_ip": "172.17.0.3",
+        "dest_port": 80,
+        "proto": "TCP",
+        "ip_v": 4,
+        "pkt_src": "wire/pcap",
+        "tx_id": 0,
+        "alert": {
+          "action": "allowed",
+          "gid": 1,
+          "signature_id": 9000618,
+          "rev": 4,
+          "signature": "PHP published upload-progress producer shape",
+          "category": "",
+          "severity": 3
+        },
+        "ts_progress": "request_body",
+        "tc_progress": "response_started",
+        "http": {
+          "hostname": "127.0.0.1",
+          "http_port": 18082,
+          "url": "/",
+          "http_method": "POST",
+          "protocol": "HTTP/1.1",
+          "length": 0
+        },
+        "files": [
+          {
+            "filename": "a.txt",
+            "gaps": false,
+            "state": "CLOSED",
+            "stored": false,
+            "size": 64,
+            "tx_id": 0
+          }
+        ],
+        "app_proto": "http",
+        "direction": "to_server",
+        "flow": {
+          "pkts_toserver": 1213,
+          "pkts_toclient": 894,
+          "bytes_toserver": 176041,
+          "bytes_toclient": 59012,
+          "start": "2026-10-25T00:34:56.338760+0000",
+          "src_ip": "172.17.0.1",
+          "dest_ip": "172.17.0.3",
+          "src_port": 43340,
+          "dest_port": 80
+        }
+      }
+    },
+    {
+      "event_id": "730717399098500:0",
+      "eve_sha256": "e65baf54049543b7a26243796dfae2018480d79a166fd4e5f12e6c1f00f8425b",
+      "eve": {
+        "timestamp": "2026-10-25T00:34:58.902773+0000",
+        "flow_id": 730717399098500,
+        "pcap_cnt": 45140,
+        "event_type": "alert",
+        "src_ip": "172.17.0.1",
+        "src_port": 49480,
         "dest_ip": "172.17.0.3",
         "dest_port": 80,
         "proto": "TCP",
@@ -57,125 +126,23 @@
         "app_proto": "http",
         "direction": "to_server",
         "flow": {
-          "pkts_toserver": 1226,
-          "pkts_toclient": 919,
-          "bytes_toserver": 169577,
-          "bytes_toclient": 60662,
-          "start": "2026-10-24T10:50:05.721747+0000",
+          "pkts_toserver": 15,
+          "pkts_toclient": 13,
+          "bytes_toserver": 43466,
+          "bytes_toclient": 866,
+          "start": "2026-10-25T00:34:58.891029+0000",
           "src_ip": "172.17.0.1",
           "dest_ip": "172.17.0.3",
-          "src_port": 45702,
+          "src_port": 49480,
           "dest_port": 80
-        }
-      }
-    },
-    {
-      "event_id": "1411033079224228:0",
-      "eve_sha256": "a2ecff3598006e3a6a1f9b147298faa84eaf217797103f7ab4007e381a26b0c9",
-      "eve": {
-        "timestamp": "2026-10-24T10:50:05.842152+0000",
-        "flow_id": 1411033079224228,
-        "in_iface": "eth0",
-        "event_type": "http",
-        "src_ip": "172.17.0.1",
-        "src_port": 45702,
-        "dest_ip": "172.17.0.3",
-        "dest_port": 80,
-        "proto": "TCP",
-        "ip_v": 4,
-        "pkt_src": "wire/pcap",
-        "tx_id": 0,
-        "http": {
-          "hostname": "127.0.0.1",
-          "http_port": 18082,
-          "url": "/",
-          "http_method": "POST",
-          "protocol": "HTTP/1.1",
-          "length": 0
-        }
-      }
-    },
-    {
-      "event_id": "152618019142945:0",
-      "eve_sha256": "e20c5f2dc419746e80733b520d0adf65555bb86e9001765b7a07457b2e015dff",
-      "eve": {
-        "timestamp": "2026-10-24T10:50:08.311416+0000",
-        "flow_id": 152618019142945,
-        "in_iface": "eth0",
-        "event_type": "alert",
-        "src_ip": "172.17.0.1",
-        "src_port": 53596,
-        "dest_ip": "172.17.0.3",
-        "dest_port": 80,
-        "proto": "TCP",
-        "ip_v": 4,
-        "pkt_src": "wire/pcap",
-        "tx_id": 0,
-        "alert": {
-          "action": "allowed",
-          "gid": 1,
-          "signature_id": 9000618,
-          "rev": 4,
-          "signature": "PHP published upload-progress producer shape",
-          "category": "",
-          "severity": 3
-        },
-        "ts_progress": "request_body",
-        "tc_progress": "response_started",
-        "http": {
-          "hostname": "127.0.0.1",
-          "http_port": 18082,
-          "url": "/",
-          "http_method": "POST",
-          "protocol": "HTTP/1.1",
-          "length": 0
-        },
-        "app_proto": "http",
-        "direction": "to_server",
-        "flow": {
-          "pkts_toserver": 22,
-          "pkts_toclient": 18,
-          "bytes_toserver": 59988,
-          "bytes_toclient": 1196,
-          "start": "2026-10-24T10:50:08.297678+0000",
-          "src_ip": "172.17.0.1",
-          "dest_ip": "172.17.0.3",
-          "src_port": 53596,
-          "dest_port": 80
-        }
-      }
-    },
-    {
-      "event_id": "152618019142945:0",
-      "eve_sha256": "22f0296a977b9c94a698c6cead2b98af1fa4f053106d2f24307e8b6c718523ea",
-      "eve": {
-        "timestamp": "2026-10-24T10:50:08.312906+0000",
-        "flow_id": 152618019142945,
-        "in_iface": "eth0",
-        "event_type": "http",
-        "src_ip": "172.17.0.1",
-        "src_port": 53596,
-        "dest_ip": "172.17.0.3",
-        "dest_port": 80,
-        "proto": "TCP",
-        "ip_v": 4,
-        "pkt_src": "wire/pcap",
-        "tx_id": 0,
-        "http": {
-          "hostname": "127.0.0.1",
-          "http_port": 18082,
-          "url": "/",
-          "http_method": "POST",
-          "protocol": "HTTP/1.1",
-          "length": 0
         }
       }
     }
   ],
   "normalized_events": [
     {
-      "event_id": "1411033079224228:0",
-      "flow_id": "1411033079224228",
+      "event_id": "47589732301298:0",
+      "flow_id": "47589732301298",
       "src_ip": "172.17.0.1",
       "dest_ip": "172.17.0.3",
       "protocol": "TCP",
@@ -184,8 +151,8 @@
       "url": "/"
     },
     {
-      "event_id": "152618019142945:0",
-      "flow_id": "152618019142945",
+      "event_id": "730717399098500:0",
+      "flow_id": "730717399098500",
       "src_ip": "172.17.0.1",
       "dest_ip": "172.17.0.3",
       "protocol": "TCP",
@@ -196,26 +163,26 @@
   ],
   "alerts": [
     {
-      "case_id": "php-affected-positive-20261024",
+      "case_id": "php-affected-positive-replay-20261025",
       "detection_id": "php-upload-progress-producer",
       "source_event_ids": [
-        "1411033079224228:0"
+        "47589732301298:0"
       ],
       "signature_id": 9000618,
       "revision": 4,
-      "timestamp": "2026-10-24T10:50:05.838659+0000",
-      "eve_sha256": "b3478af3830c557e44aab8c15d83d378566cc8b2d59a081a38e7fbd675da567c"
+      "timestamp": "2026-10-25T00:34:56.438537+0000",
+      "eve_sha256": "9824bcc84bb7cced4a8484abc29cda01e1060573d6fd6ac989c9f93b65c4476a"
     },
     {
-      "case_id": "php-affected-positive-20261024",
+      "case_id": "php-affected-positive-replay-20261025",
       "detection_id": "php-upload-progress-producer",
       "source_event_ids": [
-        "152618019142945:0"
+        "730717399098500:0"
       ],
       "signature_id": 9000618,
       "revision": 4,
-      "timestamp": "2026-10-24T10:50:08.311416+0000",
-      "eve_sha256": "e20c5f2dc419746e80733b520d0adf65555bb86e9001765b7a07457b2e015dff"
+      "timestamp": "2026-10-25T00:34:58.902773+0000",
+      "eve_sha256": "e65baf54049543b7a26243796dfae2018480d79a166fd4e5f12e6c1f00f8425b"
     }
   ]
 }

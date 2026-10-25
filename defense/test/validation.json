@@ -22,35 +22,35 @@
       "rule": "defense/rules/suricata/php-upload-progress-producer.rules",
       "playbook": "defense/playbooks/php-upload-progress-producer.md",
       "accepted_false_positives": [
-        "php-benign-fixed-boundary-20261025"
+        "php-benign-fixed-boundary-replay-20261025"
       ],
       "cases": [
         {
-          "id": "php-affected-positive-20261024",
+          "id": "php-affected-positive-replay-20261025",
           "role": "affected_positive",
           "expected_alert": true,
           "evidence": "defense/test/php-upload-progress-producer/evidence/affected-positive.json"
         },
         {
-          "id": "php-patched-control-20261024",
+          "id": "php-patched-control-replay-20261025",
           "role": "patched_control",
           "expected_alert": true,
           "evidence": "defense/test/php-upload-progress-producer/evidence/patched-control.json"
         },
         {
-          "id": "php-benign-20261024",
+          "id": "php-benign-replay-20261025",
           "role": "benign",
           "expected_alert": false,
           "evidence": "defense/test/php-upload-progress-producer/evidence/benign.json"
         },
         {
-          "id": "php-near-miss-20261024",
+          "id": "php-near-miss-replay-20261025",
           "role": "near_miss",
           "expected_alert": false,
           "evidence": "defense/test/php-upload-progress-producer/evidence/near-miss.json"
         },
         {
-          "id": "php-benign-fixed-boundary-20261025",
+          "id": "php-benign-fixed-boundary-replay-20261025",
           "role": "benign",
           "expected_alert": false,
           "evidence": "defense/test/php-upload-progress-producer/evidence/benign-fixed-boundary.json"

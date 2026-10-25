@@ -1,33 +1,43 @@
 {
-  "case_id": "php-benign-20261024",
+  "case_id": "php-benign-replay-20261025",
   "detection_id": "php-upload-progress-producer",
   "capture": {
-    "mode": "live_lab",
-    "command": "curl.exe -sS -X POST -F PHPSESSID=abc -F PHP_SESSION_UPLOAD_PROGRESS=ordinary -F f=@README.md http://127.0.0.1:18082/",
-    "collector": "Suricata 8.0.7 pcap on target container eth0; EVE JSON",
+    "mode": "live_lab_replay",
+    "command": "tcpdump -i eth0 -s 0 -B 65536 -U -w /tmp/benign2.pcap 'tcp port 80'",
+    "collector": "tcpdump on lab container eth0, then Suricata 8.0.7 offline PCAP replay",
     "backend": "Suricata signature sid 9000618 rev 4",
-    "lab": "PHP 8.4.26 Apache stock lab, php2shell-php-apache image",
-    "captured_at": "2026-10-24T10:53:50.143652+00:00",
+    "lab": "PHP 8.4.26 Apache; GET only",
+    "captured_at": "2026-10-25T00:34:11.502773+0000",
     "raw_log": "defense/test/php-upload-progress-producer/evidence/raw/benign.jsonl",
-    "raw_log_sha256": "9f809efa1811e9f772450fd3d8b17161b30fd755ea3bbd16e440f0806689e545",
-    "eve_event_count": 4,
+    "raw_log_sha256": "61a4a25e8244fc516e6137bb27b6e2799fb0eec67ea70c65eac787ddf4c1594a",
+    "eve_event_count": 6,
     "eve_alert_count": 0,
-    "kernel_packets": 12,
+    "pcap": "defense/test/php-upload-progress-producer/evidence/raw/benign.pcap.gz",
+    "pcap_sha256": "21749e1c68c8b55077a5765b1dd2023ba868868e74b5c1d98299bded46fbb4b1",
+    "pcap_packet_count": 10,
+    "pcap_truncated_packets": 0,
+    "tcpdump_log": "defense/test/php-upload-progress-producer/evidence/raw/benign.tcpdump.log",
+    "tcpdump_log_sha256": "c92ea53c117507849f0a956ff2dae8ed91ff46a10c0747b4ff45b991bb608cce",
+    "kernel_packets": 10,
+    "tcpdump_received": 10,
     "kernel_drops": 0,
     "reassembly_gap": 0,
-    "capture_health": "no_loss_reported"
+    "capture_health": "no_loss_reported",
+    "replay_image": "jasonish/suricata@sha256:bf4bea5b45d9c10265a3ee6628e2ec8930b9d1fb7caf9d1afb63af413b9cbb26",
+    "rule_sha256": "a632f81f32b53cb18645a68f14fabb9d1d7f0fbba67a50fc7ca635087c75a59a",
+    "replay_command": "suricata -r /work/case.pcap -k none -S /work/local.rules -l /work/logs"
   },
   "raw_events": [
     {
-      "event_id": "1731591627921073:0",
-      "eve_sha256": "4d170e8a450c8970e2b992bbe116d4ea6e318c1d55334e1f23c15d45c8885d98",
+      "event_id": "1033497296962375:0",
+      "eve_sha256": "062651491c6eca719a02e43dd35f68f54b82e13b24d49fa05407e5149e43c48d",
       "eve": {
-        "timestamp": "2026-10-24T10:53:50.143652+0000",
-        "flow_id": 1731591627921073,
-        "in_iface": "eth0",
+        "timestamp": "2026-10-25T00:34:11.510269+0000",
+        "flow_id": 1033497296962375,
+        "pcap_cnt": 7,
         "event_type": "http",
         "src_ip": "172.17.0.1",
-        "src_port": 49420,
+        "src_port": 35092,
         "dest_ip": "172.17.0.3",
         "dest_port": 80,
         "proto": "TCP",
@@ -37,10 +47,10 @@
         "http": {
           "hostname": "127.0.0.1",
           "http_port": 18082,
-          "url": "/",
-          "http_user_agent": "curl/8.21.0",
+          "url": "/?case=benign2",
+          "http_user_agent": "Mozilla/5.0 (Windows NT 10.0; Microsoft Windows 10.0.26200; en-US) PowerShell/7.6.5",
           "http_content_type": "text/plain",
-          "http_method": "POST",
+          "http_method": "GET",
           "protocol": "HTTP/1.1",
           "status": 200,
           "length": 15
@@ -50,14 +60,14 @@
   ],
   "normalized_events": [
     {
-      "event_id": "1731591627921073:0",
-      "flow_id": "1731591627921073",
+      "event_id": "1033497296962375:0",
+      "flow_id": "1033497296962375",
       "src_ip": "172.17.0.1",
       "dest_ip": "172.17.0.3",
       "protocol": "TCP",
       "service_port": 80,
-      "http_method": "POST",
-      "url": "/"
+      "http_method": "GET",
+      "url": "/?case=benign2"
     }
   ],
   "alerts": []
