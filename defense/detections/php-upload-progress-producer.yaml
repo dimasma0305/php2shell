@@ -18,6 +18,6 @@ selection:
   rule: ../rules/suricata/php-upload-progress-producer.rules
 severity: medium
 reason: A published exploit producer shape was observed; impact needs separate proof.
-known_overlap: A live benign upload with the exact 17-S boundary and upload-progress field alerted with zero reported packet loss (php-benign-fixed-boundary-20261025); this rule cannot infer intent.
+known_overlap: A live benign upload with the exact 17-S boundary and upload-progress field alerted with zero reported packet loss (php-benign-fixed-boundary-replay-20261025); this rule cannot infer intent.
 known_misses: Changed boundary, encrypted traffic before the sensor, packet loss, alternative exploit chains.
 deployment: Alert-only test; do not block based on this experimental rule.

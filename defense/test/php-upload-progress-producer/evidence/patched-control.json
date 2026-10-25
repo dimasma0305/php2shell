@@ -1,34 +1,44 @@
 {
-  "case_id": "php-patched-control-20261024",
+  "case_id": "php-patched-control-replay-20261025",
   "detection_id": "php-upload-progress-producer",
   "capture": {
-    "mode": "live_lab",
-    "command": "$b = 'S' * 17; $body = \"--$b`r`nContent-Disposition: form-data; name=`\"PHPSESSID`\"`r`n`r`nabc`r`n--$b`r`nContent-Disposition: form-data; name=`\"PHP_SESSION_UPLOAD_PROGRESS`\"`r`n`r`npwn`r`n--$b--`r`n\"; $response = Invoke-WebRequest -Uri 'http://127.0.0.1:18082/' -Method Post -Body ([Text.Encoding]::UTF8.GetBytes($body)) -ContentType \"multipart/form-data; boundary=$b\"; Write-Output \"$($response.StatusCode) $($response.Content)\"",
-    "collector": "Suricata 8.0.7 pcap on target container eth0; EVE JSON",
+    "mode": "live_lab_replay",
+    "command": "tcpdump -i eth0 -s 0 -B 65536 -U -w /tmp/patched.pcap 'tcp port 80'",
+    "collector": "tcpdump on lab container eth0, then Suricata 8.0.7 offline PCAP replay",
     "backend": "Suricata signature sid 9000618 rev 4",
-    "lab": "PHP 8.4.27 Apache official image sha256:c6527b06c772a2c3cae648ce58c23a2a12ed2fed41cdfb0619ea64be008cc601",
-    "captured_at": "2026-10-24T10:55:09.557051+00:00",
+    "lab": "PHP 8.4.27 Apache; same request shape",
+    "captured_at": "2026-10-25T00:43:02.801707+0000",
     "raw_log": "defense/test/php-upload-progress-producer/evidence/raw/patched-control.jsonl",
-    "raw_log_sha256": "43b5aed8789216df46541814d6448bfdebe1d47a9f31deff9e83e4c9e5484bec",
-    "eve_event_count": 26,
+    "raw_log_sha256": "1b1cb5c6ba306cc240ec87efd40d0006ffd73ab6e1256fde1dc6950725301833",
+    "eve_event_count": 5,
     "eve_alert_count": 1,
-    "kernel_packets": 14,
+    "pcap": "defense/test/php-upload-progress-producer/evidence/raw/patched-control.pcap.gz",
+    "pcap_sha256": "c3ccb9c67c39ecc555e4f67b2f50eba271151a1cd497a41a79e16c7e2ac41122",
+    "pcap_packet_count": 10,
+    "pcap_truncated_packets": 0,
+    "tcpdump_log": "defense/test/php-upload-progress-producer/evidence/raw/patched-control.tcpdump.log",
+    "tcpdump_log_sha256": "c92ea53c117507849f0a956ff2dae8ed91ff46a10c0747b4ff45b991bb608cce",
+    "kernel_packets": 10,
+    "tcpdump_received": 10,
     "kernel_drops": 0,
     "reassembly_gap": 0,
-    "capture_health": "no_loss_reported"
+    "capture_health": "no_loss_reported",
+    "replay_image": "jasonish/suricata@sha256:bf4bea5b45d9c10265a3ee6628e2ec8930b9d1fb7caf9d1afb63af413b9cbb26",
+    "rule_sha256": "a632f81f32b53cb18645a68f14fabb9d1d7f0fbba67a50fc7ca635087c75a59a",
+    "replay_command": "suricata -r /work/case.pcap -k none -S /work/local.rules -l /work/logs"
   },
   "raw_events": [
     {
-      "event_id": "1481060583824238:0",
-      "eve_sha256": "304b50b8579f9591d676fd3753fac6e248109108b2e2f1d0b45371cbe1ee1ce5",
+      "event_id": "1698707220952514:0",
+      "eve_sha256": "148af2ba5e3dd95ffae2675fa9548167058ef806ac32168546db8207b2a73c8c",
       "eve": {
-        "timestamp": "2026-10-24T10:55:09.557051+0000",
-        "flow_id": 1481060583824238,
-        "in_iface": "eth0",
+        "timestamp": "2026-10-25T00:43:02.801707+0000",
+        "flow_id": 1698707220952514,
+        "pcap_cnt": 7,
         "event_type": "alert",
         "src_ip": "172.17.0.1",
-        "src_port": 60564,
-        "dest_ip": "172.17.0.3",
+        "src_port": 50312,
+        "dest_ip": "172.17.0.5",
         "dest_port": 80,
         "proto": "TCP",
         "ip_v": 4,
@@ -47,83 +57,54 @@
         "tc_progress": "response_complete",
         "http": {
           "hostname": "127.0.0.1",
-          "http_port": 18082,
-          "url": "/",
+          "http_port": 18083,
+          "url": "/?case=patched",
           "http_user_agent": "Mozilla/5.0 (Windows NT 10.0; Microsoft Windows 10.0.26200; en-US) PowerShell/7.6.5",
           "http_content_type": "text/plain",
           "http_method": "POST",
           "protocol": "HTTP/1.1",
           "status": 200,
-          "length": 10
+          "length": 15
         },
         "app_proto": "http",
         "direction": "to_server",
         "flow": {
           "pkts_toserver": 4,
           "pkts_toclient": 3,
-          "bytes_toserver": 728,
-          "bytes_toclient": 454,
-          "start": "2026-10-24T10:55:09.541444+0000",
+          "bytes_toserver": 741,
+          "bytes_toclient": 459,
+          "start": "2026-10-25T00:43:02.788727+0000",
           "src_ip": "172.17.0.1",
-          "dest_ip": "172.17.0.3",
-          "src_port": 60564,
+          "dest_ip": "172.17.0.5",
+          "src_port": 50312,
           "dest_port": 80
-        }
-      }
-    },
-    {
-      "event_id": "1481060583824238:0",
-      "eve_sha256": "0fc73d2858e2db986091176159f4b58fb4d1002ea7bfd532b0eba00998f3b078",
-      "eve": {
-        "timestamp": "2026-10-24T10:55:09.557051+0000",
-        "flow_id": 1481060583824238,
-        "in_iface": "eth0",
-        "event_type": "http",
-        "src_ip": "172.17.0.1",
-        "src_port": 60564,
-        "dest_ip": "172.17.0.3",
-        "dest_port": 80,
-        "proto": "TCP",
-        "ip_v": 4,
-        "pkt_src": "wire/pcap",
-        "tx_id": 0,
-        "http": {
-          "hostname": "127.0.0.1",
-          "http_port": 18082,
-          "url": "/",
-          "http_user_agent": "Mozilla/5.0 (Windows NT 10.0; Microsoft Windows 10.0.26200; en-US) PowerShell/7.6.5",
-          "http_content_type": "text/plain",
-          "http_method": "POST",
-          "protocol": "HTTP/1.1",
-          "status": 200,
-          "length": 10
         }
       }
     }
   ],
   "normalized_events": [
     {
-      "event_id": "1481060583824238:0",
-      "flow_id": "1481060583824238",
+      "event_id": "1698707220952514:0",
+      "flow_id": "1698707220952514",
       "src_ip": "172.17.0.1",
-      "dest_ip": "172.17.0.3",
+      "dest_ip": "172.17.0.5",
       "protocol": "TCP",
       "service_port": 80,
       "http_method": "POST",
-      "url": "/"
+      "url": "/?case=patched"
     }
   ],
   "alerts": [
     {
-      "case_id": "php-patched-control-20261024",
+      "case_id": "php-patched-control-replay-20261025",
       "detection_id": "php-upload-progress-producer",
       "source_event_ids": [
-        "1481060583824238:0"
+        "1698707220952514:0"
       ],
       "signature_id": 9000618,
       "revision": 4,
-      "timestamp": "2026-10-24T10:55:09.557051+0000",
-      "eve_sha256": "304b50b8579f9591d676fd3753fac6e248109108b2e2f1d0b45371cbe1ee1ce5"
+      "timestamp": "2026-10-25T00:43:02.801707+0000",
+      "eve_sha256": "148af2ba5e3dd95ffae2675fa9548167058ef806ac32168546db8207b2a73c8c"
     }
   ]
 }

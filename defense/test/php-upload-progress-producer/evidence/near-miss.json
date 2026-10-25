@@ -1,33 +1,43 @@
 {
-  "case_id": "php-near-miss-20261024",
+  "case_id": "php-near-miss-replay-20261025",
   "detection_id": "php-upload-progress-producer",
   "capture": {
-    "mode": "live_lab",
-    "command": "$b = 'S' * 17; $body = \"--$b`r`nContent-Disposition: form-data; name=`\"PHPSESSID`\"`r`n`r`nabc`r`n--$b`r`nContent-Disposition: form-data; name=`\"f`\"`r`n`r`nhello`r`n--$b--`r`n\"; $response = Invoke-WebRequest -Uri 'http://127.0.0.1:18082/' -Method Post -Body ([Text.Encoding]::UTF8.GetBytes($body)) -ContentType \"multipart/form-data; boundary=$b\"; Write-Output \"$($response.StatusCode) $($response.Content)\"",
-    "collector": "Suricata 8.0.7 pcap on target container eth0; EVE JSON",
+    "mode": "live_lab_replay",
+    "command": "tcpdump -i eth0 -s 0 -B 65536 -U -w /tmp/nearmiss.pcap 'tcp port 80'",
+    "collector": "tcpdump on lab container eth0, then Suricata 8.0.7 offline PCAP replay",
     "backend": "Suricata signature sid 9000618 rev 4",
-    "lab": "PHP 8.4.26 Apache stock lab, php2shell-php-apache image",
-    "captured_at": "2026-10-24T10:54:14.059196+00:00",
+    "lab": "PHP 8.4.26 Apache; no progress field",
+    "captured_at": "2026-10-25T00:40:57.424438+0000",
     "raw_log": "defense/test/php-upload-progress-producer/evidence/raw/near-miss.jsonl",
-    "raw_log_sha256": "83d2af18e6ecbd7fc70ee4a4d71724bb495fe79932a3ca877cdec9764db33c60",
-    "eve_event_count": 6,
+    "raw_log_sha256": "3973fce22a7fccfeb6353667e85122751ceaf06bc7b1e427770bf667cd220ca6",
+    "eve_event_count": 4,
     "eve_alert_count": 0,
-    "kernel_packets": 12,
+    "pcap": "defense/test/php-upload-progress-producer/evidence/raw/near-miss.pcap.gz",
+    "pcap_sha256": "0a7cc6aac60617c387c6d3f9ae402afcbd8c530961eb85efeaaf93d5898914f3",
+    "pcap_packet_count": 10,
+    "pcap_truncated_packets": 0,
+    "tcpdump_log": "defense/test/php-upload-progress-producer/evidence/raw/near-miss.tcpdump.log",
+    "tcpdump_log_sha256": "c92ea53c117507849f0a956ff2dae8ed91ff46a10c0747b4ff45b991bb608cce",
+    "kernel_packets": 10,
+    "tcpdump_received": 10,
     "kernel_drops": 0,
     "reassembly_gap": 0,
-    "capture_health": "no_loss_reported"
+    "capture_health": "no_loss_reported",
+    "replay_image": "jasonish/suricata@sha256:bf4bea5b45d9c10265a3ee6628e2ec8930b9d1fb7caf9d1afb63af413b9cbb26",
+    "rule_sha256": "a632f81f32b53cb18645a68f14fabb9d1d7f0fbba67a50fc7ca635087c75a59a",
+    "replay_command": "suricata -r /work/case.pcap -k none -S /work/local.rules -l /work/logs"
   },
   "raw_events": [
     {
-      "event_id": "1911620710124102:0",
-      "eve_sha256": "ef1a4ad84cdf7707f773f4b5039eb47ffad79852c597ad65c77107e461a06560",
+      "event_id": "388112363580830:0",
+      "eve_sha256": "b670bb2fab4843aae9f9188f8827fe1e7f79861a2278fc453ec56a386c568f67",
       "eve": {
-        "timestamp": "2026-10-24T10:54:14.059196+0000",
-        "flow_id": 1911620710124102,
-        "in_iface": "eth0",
+        "timestamp": "2026-10-25T00:40:57.424438+0000",
+        "flow_id": 388112363580830,
+        "pcap_cnt": 7,
         "event_type": "http",
         "src_ip": "172.17.0.1",
-        "src_port": 49032,
+        "src_port": 38154,
         "dest_ip": "172.17.0.3",
         "dest_port": 80,
         "proto": "TCP",
@@ -37,7 +47,7 @@
         "http": {
           "hostname": "127.0.0.1",
           "http_port": 18082,
-          "url": "/",
+          "url": "/?case=near-miss",
           "http_user_agent": "Mozilla/5.0 (Windows NT 10.0; Microsoft Windows 10.0.26200; en-US) PowerShell/7.6.5",
           "http_content_type": "text/plain",
           "http_method": "POST",
@@ -50,14 +60,14 @@
   ],
   "normalized_events": [
     {
-      "event_id": "1911620710124102:0",
-      "flow_id": "1911620710124102",
+      "event_id": "388112363580830:0",
+      "flow_id": "388112363580830",
       "src_ip": "172.17.0.1",
       "dest_ip": "172.17.0.3",
       "protocol": "TCP",
       "service_port": 80,
       "http_method": "POST",
-      "url": "/"
+      "url": "/?case=near-miss"
     }
   ],
   "alerts": []

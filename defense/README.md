@@ -12,19 +12,19 @@ No production-ready detection is shipped. The Suricata rule is a lab-tested cand
 
 ### Claim and scope
 
-Claim: attempted_trigger. Status: experimental. Use: Rule for evaluation. The rule saw the published PoC's multipart upload-progress request shape. The patched lab also alerts because it receives the same attempt shape. A normal upload with the same boundary and field also alerted, so the signal does not establish attacker intent.
+Claim: attempted_trigger. Status: experimental. Use: Rule for evaluation. The rule saw the published PoC's multipart upload-progress markers. A small request with the same markers also alerts on the patched lab. A normal upload with the same boundary and field alerted too, so the signal does not establish attacker intent.
 
 ### Telemetry and method
 
-Suricata 8.0.7 reads plaintext HTTP on the Apache container's `eth0`. The [analytic](detections/php-upload-progress-producer.yaml) describes the signal; the [rule](rules/suricata/php-upload-progress-producer.rules) matches the PoC's 17-character `S` boundary and `PHP_SESSION_UPLOAD_PROGRESS` field.
+Suricata 8.0.7 reads plaintext HTTP on the Apache container's `eth0`. The [analytic](detections/php-upload-progress-producer.yaml) describes the signal; the [rule](rules/suricata/php-upload-progress-producer.rules) matches the PoC's 17-character `S` boundary and `PHP_SESSION_UPLOAD_PROGRESS` field. The five cases below are new live-lab packet captures replayed through the unchanged rule. Each has zero reported capture drops and TCP gaps.
 
 ### Evidence
 
 | Case | Expected | Observed alerts | Capture health | Evidence | Raw log |
 | --- | --- | ---: | --- | --- | --- |
-| PHP 8.4.26 PoC | Alert | 2 | loss_reported | [Case](test/php-upload-progress-producer/evidence/affected-positive.json) | [EVE](test/php-upload-progress-producer/evidence/raw/affected-positive.jsonl) |
-| PHP 8.4.27 same shape | Alert | 1 | no_loss_reported | [Case](test/php-upload-progress-producer/evidence/patched-control.json) | [EVE](test/php-upload-progress-producer/evidence/raw/patched-control.jsonl) |
-| Ordinary upload progress | No alert | 0 | no_loss_reported | [Case](test/php-upload-progress-producer/evidence/benign.json) | [EVE](test/php-upload-progress-producer/evidence/raw/benign.jsonl) |
+| PHP 8.4.26 PoC | Alert | 2 | no_loss_reported | [Case](test/php-upload-progress-producer/evidence/affected-positive.json) | [EVE](test/php-upload-progress-producer/evidence/raw/affected-positive.jsonl) |
+| PHP 8.4.27 same markers | Alert | 1 | no_loss_reported | [Case](test/php-upload-progress-producer/evidence/patched-control.json) | [EVE](test/php-upload-progress-producer/evidence/raw/patched-control.jsonl) |
+| Ordinary GET | No alert | 0 | no_loss_reported | [Case](test/php-upload-progress-producer/evidence/benign.json) | [EVE](test/php-upload-progress-producer/evidence/raw/benign.jsonl) |
 | Boundary without field | No alert | 0 | no_loss_reported | [Case](test/php-upload-progress-producer/evidence/near-miss.json) | [EVE](test/php-upload-progress-producer/evidence/raw/near-miss.jsonl) |
 | Benign upload, same boundary | No alert | 1 | no_loss_reported | [Case](test/php-upload-progress-producer/evidence/benign-fixed-boundary.json) | [EVE](test/php-upload-progress-producer/evidence/raw/benign-fixed-boundary.jsonl) |
 
@@ -49,14 +49,14 @@ Look for SID `9000618` in `.tools/defense-php/eve.json`. The PoC's fresh `uid=` 
 
 ### Limits and next step
 
-This rule matches one PoC boundary and misses changed boundaries or traffic encrypted before the sensor. The positive capture had 1,238 kernel packet drops and two TCP reassembly gaps. A benign request with the same boundary produced one false positive with zero reported loss. Use the [playbook](playbooks/php-upload-progress-producer.md) to inspect the full request, PHP build, worker identity, and nearby failures before attributing the event. Keep the rule in alert-only evaluation; it cannot support automatic blocking.
+This rule matches one PoC boundary and misses changed boundaries or traffic encrypted before the sensor. A benign upload with the same boundary produced one false positive despite a loss-free capture. A [narrower rule trial](test/php-rule-candidates/) removed that false positive by matching an exact PoC field, which limits its coverage. Use the [playbook](playbooks/php-upload-progress-producer.md) to inspect the full request, PHP build, worker identity, and nearby failures before attributing the event. Keep the rule in alert-only evaluation; it cannot support automatic blocking. See [replay instructions](test/README.md) for all five captured cases. Zero reported loss does not prove complete field coverage.
 
 ## Validation method
 
-The [manifest](test/validation.json) lists the lab cases and the linked receipts. Each receipt records a SHA-256 for its complete raw log. Check those hashes from the repository root with Python's standard library:
+The [manifest](test/validation.json) lists the lab cases and the linked receipts. Each receipt records SHA-256 values for its complete EVE log, PCAP, and tcpdump log. Check those hashes from the repository root with Python's standard library:
 
 ```bash
-python -c "import hashlib,json,pathlib; m=json.loads(pathlib.Path('defense/test/validation.json').read_text()); r=[json.loads(pathlib.Path(c['evidence']).read_text()) for d in m['detections'] for c in d['cases']]; assert all(hashlib.sha256(pathlib.Path(x['capture']['raw_log']).read_bytes()).hexdigest()==x['capture']['raw_log_sha256'] for x in r); print(len(r), 'raw logs match their recorded SHA-256')"
+python -c "import hashlib,json,pathlib; m=json.loads(pathlib.Path('defense/test/validation.json').read_text()); r=[json.loads(pathlib.Path(c['evidence']).read_text()) for d in m['detections'] for c in d['cases']]; fields=('raw_log','pcap','tcpdump_log'); assert all(hashlib.sha256(pathlib.Path(x['capture'][k]).read_bytes()).hexdigest()==x['capture'][k+'_sha256'] for x in r for k in fields); print(len(r), 'case triplets match their SHA-256 values')"
 ```
 
 The hashes and case table support an audit of these small lab results. They do not authenticate a live run, prove full sensor coverage, or establish a production false-positive rate.

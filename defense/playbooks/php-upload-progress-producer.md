@@ -9,8 +9,8 @@
    upload-progress field, body size, session identifier, and repeated form
    fields. Avoid copying session values into a ticket.
 3. Correlate the request to Apache worker PID, PHP memory-limit errors, worker
-   exit/restart, and subsequent requests on the same session. Record the exact
-   PHP build and SAPI.
+   exit/restart, and later requests on that worker. A session ID alone does not
+   identify a worker. Record the exact PHP build and SAPI.
 4. Classify as **attempt observed** unless runtime evidence separately proves
    memory corruption or command execution. A patched server may still receive
    the same attempt. If the request is an expected integration test or
